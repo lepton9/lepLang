@@ -1,0 +1,9 @@
+
+f:sum(a:int, b:int) -> int {
+  int:c = a + b;
+  return c;
+}
+
+f:main() -> int {
+  return 0;
+}
