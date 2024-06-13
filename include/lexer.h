@@ -68,13 +68,15 @@ void freeLexer(Lexer *lexer);
 
 void lex(Lexer *lexer); // Tokenize
 
-Token *getToken(Lexer *lexer);
+Token *getToken(Lexer *lexer); // getNextToken()
 Token *makeToken(const TokenType type, const char *value, const CLoc codeLoc);
 void addToken(Lexer *lexer, Token *token);
 bool atEnd(Lexer *lexer);
 char peek(Lexer *lexer);
-char next(Lexer *lexer);
+char next(Lexer *lexer); // advance()
+void nextLine(Lexer *lexer);
 
+const char* tokenTypeToStr(TokenType type);
 void printToken(Token* token);
 
 #endif

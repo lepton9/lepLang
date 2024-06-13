@@ -21,6 +21,7 @@ void freeLexer(Lexer *lexer) {
 void lex(Lexer *lexer) {
   while (!atEnd(lexer)) {
     Token *token = getToken(lexer);
+    addToken(lexer, token);
   }
 
   Token *eof = makeToken(T_EOF, NULL, lexer->codeLoc);
@@ -29,12 +30,21 @@ void lex(Lexer *lexer) {
 
 Token *getToken(Lexer *lexer) {
   char c = next(lexer);
-  return NULL;
+  if (c == '\n') {
+    nextLine(lexer);
+    c = 'n';
+  }
+
+  char* value = malloc(sizeof(char));
+  *value = c;
+
+  Token* token = makeToken(T_CHAR_LIT, value, lexer->codeLoc);
+  return token;
 }
 
 Token *makeToken(const TokenType type, const char *value, const CLoc codeLoc) {
   Token *token = malloc(sizeof(Token));
-  *token = (Token){T_EOF, NULL, codeLoc};
+  *token = (Token){type, (char*)value, codeLoc};
   return token;
 }
 
@@ -60,6 +70,6 @@ void nextLine(Lexer *lexer) {
 }
 
 void printToken(Token *token) {
-  printf("Type: %d, Value: %s, Line: %d, Column: %d\n", token->type,
-         token->value, token->loc.line, token->loc.column);
+  printf("Type: %d, Value: %c, Line: %d, Column: %d\n", token->type,
+         *token->value, token->loc.line, token->loc.column);
 }

@@ -28,6 +28,14 @@ int main(int argc, char **argv) {
   Lexer* lexer = initLexer();
   readBytes(fileName, &lexer->src, &lexer->srcLen);
 
+  lex(lexer);
+
+  node* head = lexer->tokens->head;
+  while(head->next != NULL) {
+    printToken(head->data);
+    head = head->next;
+  }
+
   printf("%s\n", lexer->src);
   printf("Read %d characters\n", lexer->srcLen);
 
