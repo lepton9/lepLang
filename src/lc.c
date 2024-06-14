@@ -1,6 +1,7 @@
+#include "../include/lexer.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "../include/lexer.h"
+#include <time.h>
 
 void readBytes(const char *fileName, char **buffer, int *length) {
   FILE *f = fopen(fileName, "rb");
@@ -25,19 +26,25 @@ int main(int argc, char **argv) {
   }
   char *fileName = argv[1];
 
-  Lexer* lexer = initLexer();
+  clock_t begin = clock();
+
+  Lexer *lexer = initLexer();
   readBytes(fileName, &lexer->src, &lexer->srcLen);
 
   lex(lexer);
 
-  node* head = lexer->tokens->head;
-  while(head->next != NULL) {
+  clock_t end = clock();
+  double time = (double)(end - begin) / CLOCKS_PER_SEC;
+
+  node *head = lexer->tokens->head;
+  while (head->next != NULL) {
     printToken(head->data);
     head = head->next;
   }
 
   printf("%s\n", lexer->src);
   printf("Read %d characters\n", lexer->srcLen);
+  printf("Took %f s\n", time);
 
   free(lexer);
 

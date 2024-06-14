@@ -4,6 +4,7 @@
 #define COMMENT_CHAR '#'
 
 typedef enum {
+  T_ARROW,
   T_COLON,
   T_SEMICOLON,
   T_PAREN_L,
@@ -12,6 +13,8 @@ typedef enum {
   T_BRACE_R,
   T_DOT,
   T_COMMA,
+  T_SPACE,
+  T_NEWLINE,
 
   // Operators
   T_EQUALS,
@@ -36,10 +39,15 @@ typedef enum {
   T_STR,
   T_FLOAT,
   T_VOID,
+  T_RET,
+
+  T_ERROR,
 
   T_EOF
 
 } tokenType;
+
+// char keywords[20] = {"int", "float", "char", "bool", "str", "void", "f", "while", "ret", "main", "if", "else"};
 
 typedef struct {
   int line;

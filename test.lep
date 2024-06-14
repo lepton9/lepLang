@@ -1,9 +1,11 @@
 
-f:sum(a:int, b:int) -> int {
-  int:c = a + b;
-  return c;
+f:sum(first:int, second:int) -> int {
+  int:total = first + second;
+  ret total;
 }
 
 f:main() -> int {
-  return 0;
+  int:a = 123;
+  float:b = 12.34;
+  ret 0;
 }

@@ -10,6 +10,7 @@
     - int:a = 1; -> to tokens
         - keyword, colon, identifier, operator/equals/assign, int_literal, semicolon
     - Tokens maybe in a dynamic list
+    - error token
 - parser
     - parsing the tokens
 - compiler
@@ -86,7 +87,7 @@ f:sum : (int:a, int:b) -> int {
 
 f:sum = (int:a, int:b) -> int {
     int:c = a + b;
-    return c;
+    ret c;
 }
 
 f:sum(int:a, int:b) -> int {
