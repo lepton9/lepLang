@@ -7,6 +7,7 @@
 Lexer *initLexer() {
   Lexer *lexer = malloc(sizeof(Lexer));
   lexer->tokens = create_list();
+  lexer->errors = create_list();
   lexer->srcLen = 0;
   lexer->srcPos = 0;
   lexer->codeLoc.line = 1;
@@ -17,6 +18,8 @@ Lexer *initLexer() {
 void freeLexer(Lexer *lexer) {
   list_clear(lexer->tokens);
   free(lexer->tokens);
+  free(lexer->errors); // Add free err->msg
+  free(lexer->src);
   free(lexer);
 }
 
@@ -36,74 +39,45 @@ void lex(Lexer *lexer) {
 token *getNextToken(Lexer *lexer) {
   int begI = lexer->srcPos;
   CLoc cLocB = lexer->codeLoc;
-  char* tv;
   char* c = malloc(sizeof(char));
   *c = next(lexer);
-  token *token;
   switch (*c) {
-    case ' ': // Or break
+    case ' ':
       // token = makeToken(T_SPACE, c, cLocB);
       return NULL;
-      break;
-    case '\n': // Or break
+    case '\n':
       // token = makeToken(T_NEWLINE, c, cLocB);
       nextLine(lexer);
       return NULL;
-      break;
-    case ':':
-      token = makeToken(T_COLON, c, cLocB);
-      break;
-    case ';':
-      token = makeToken(T_SEMICOLON, c, cLocB);
-      break;
-    case '(':
-      token = makeToken(T_PAREN_L, c, cLocB);
-      break;
-    case ')':
-      token = makeToken(T_PAREN_R, c, cLocB);
-      break;
-    case '{':
-      token = makeToken(T_BRACE_L, c, cLocB);
-      break;
-    case '}':
-      token = makeToken(T_BRACE_R, c, cLocB);
-      break;
-    case '.':
-      token = makeToken(T_DOT, c, cLocB);
-      break;
-    case ',':
-      token = makeToken(T_COMMA, c, cLocB);
-      break;
-    case '=':
-      token = makeToken(T_EQUALS, c, cLocB);
-      break;
-    case '+':
-      token = makeToken(T_PLUS, c, cLocB);
-      break;
+    case ':': return makeToken(T_COLON, c, cLocB);
+    case ';': return makeToken(T_SEMICOLON, c, cLocB);
+    case '(': return makeToken(T_PAREN_L, c, cLocB);
+    case ')': return makeToken(T_PAREN_R, c, cLocB);
+    case '{': return makeToken(T_BRACE_L, c, cLocB);
+    case '}': return makeToken(T_BRACE_R, c, cLocB);
+    case '.': return makeToken(T_DOT, c, cLocB);
+    case ',': return makeToken(T_COMMA, c, cLocB);
+    case '=': return makeToken(T_EQUALS, c, cLocB);
+    case '+': return makeToken(T_PLUS, c, cLocB);
+    case '*': return makeToken(T_ASTERISK, c, cLocB);
+    case '/': return makeToken(T_SLASH, c, cLocB);
     case '-':
       if (peek(lexer) == '>') {
         next(lexer);
         return makeTokenN(lexer, T_ARROW, begI, cLocB);
       }
-      token = makeToken(T_MINUS, c, cLocB);
-      break;
-    case '*':
-      token = makeToken(T_ASTERISK, c, cLocB);
-      break;
-    case '/':
-      token = makeToken(T_SLASH, c, cLocB);
-      break;
+      return makeToken(T_MINUS, c, cLocB);
 
-    default:
+    default: {
       if (isalpha(*c)) {
         while (isalpha(peek(lexer))) {
           next(lexer);
         }
-        tv = malloc((lexer->srcPos - begI) * sizeof(char));
+        char *tv = malloc((lexer->srcPos - begI) * sizeof(char));
         strncpy(tv, lexer->src + begI, lexer->srcPos - begI);
         tokenType tt = isKeyword(lexer, tv);
         // tt = (tt >= 0) ? tt : T_IDENTIFIER;
-        token = makeToken(tt, tv, cLocB);
+        return makeToken(tt, tv, cLocB);
       }
       else if (isdigit(*c)) {
         tokenType tt = T_INT_LIT;
@@ -118,21 +92,18 @@ token *getNextToken(Lexer *lexer) {
               next(lexer);
             }
           } else {
-            // Make error function and the error msg as value 
-            return makeToken(T_ERROR, c, cLocB);
+            addSynError(lexer, syntaxError(lexer, "Invalid float", begI, lexer->srcPos - begI));
+            return NULL;
           }
         }
-        token = makeTokenN(lexer, tt, begI, cLocB);
-      }
-      else {
-        token = makeToken(T_ERROR, c, cLocB);
+        return makeTokenN(lexer, tt, begI, cLocB);
       }
       break;
+    }
   }
 
-  // If no match for token add error
-  // token *token = makeToken(T_ERROR, value, lexer->codeLoc);
-  return token;
+  addSynError(lexer, syntaxError(lexer, "No token match", begI, lexer->srcPos - begI));
+  return NULL;
 }
 
 tokenType isKeyword(Lexer *lexer, const char* value) {
@@ -151,6 +122,37 @@ token* makeTokenN(Lexer* lexer, const tokenType type, const int beg, const CLoc 
   char* tval = malloc((lexer->srcPos - beg) * sizeof(char));
   strncpy(tval, lexer->src + beg, lexer->srcPos - beg);
   return makeToken(type, tval, cl);
+}
+
+synError* syntaxError(Lexer *lexer, const char* msg, const int beg, const int len) {
+  synError *err = malloc(sizeof(synError));
+  err->beg = beg;
+  err->len = len;
+  err->codeLoc = lexer->codeLoc;
+  err->msg = malloc(strlen(msg) * sizeof(char));
+  strcpy(err->msg, msg);
+  return err;
+}
+
+void addSynError(Lexer *lexer, synError * err) {
+  add_to_end(lexer->errors, err);
+}
+
+void printError(Lexer *lexer, synError *err) {
+  printf("(%.*s) | %s at L%d C%d\n", err->len, lexer->src + err->beg, err->msg, err->codeLoc.line, err->codeLoc.column);
+}
+
+void printErrors(Lexer *lexer) {
+  printf("Syntax errors:\n");
+  for (node *head=lexer->errors->head; head != NULL; head = head->next) {
+    printError(lexer, head->data);
+  }
+}
+
+void printTokens(Lexer *lexer) {
+  for (node *head=lexer->tokens->head; head != NULL; head = head->next) {
+    printToken(head->data);
+  }
 }
 
 void addToken(Lexer *lexer, token *token) { add_to_end(lexer->tokens, token); }

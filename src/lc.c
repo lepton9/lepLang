@@ -36,17 +36,14 @@ int main(int argc, char **argv) {
   clock_t end = clock();
   double time = (double)(end - begin) / CLOCKS_PER_SEC;
 
-  node *head = lexer->tokens->head;
-  while (head->next != NULL) {
-    printToken(head->data);
-    head = head->next;
-  }
+  printTokens(lexer);
+  printErrors(lexer);
 
   printf("%s\n", lexer->src);
   printf("Read %d characters\n", lexer->srcLen);
   printf("Took %f s\n", time);
 
-  free(lexer);
+  freeLexer(lexer);
 
   return 0;
 }

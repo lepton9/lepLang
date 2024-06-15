@@ -8,7 +8,15 @@
 #define COMMENT_CHAR '#'
 
 typedef struct {
+  char* msg;
+  int beg;
+  int len;
+  CLoc codeLoc;
+} synError;
+
+typedef struct {
   LList *tokens;
+  LList *errors;
   char *src;
   int srcLen;
   int srcPos;
@@ -28,6 +36,12 @@ char next(Lexer *lexer); // advance()
 void nextLine(Lexer *lexer);
 tokenType isKeyword(Lexer *lexer, const char *value);
 
-token* makeTokenN(Lexer* lexer, const tokenType type, const int beg, const CLoc cl);
+token* makeTokenN(Lexer *lexer, const tokenType type, const int beg, const CLoc cl);
+synError* syntaxError(Lexer *lexer, const char* msg, const int beg, const int len);
+void addSynError(Lexer *lexer, synError * err);
+
+void printTokens(Lexer *lexer);
+void printErrors(Lexer *lexer);
+void printError(Lexer *lexer, synError *err);
 
 #endif

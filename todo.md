@@ -1,3 +1,12 @@
+DONE:
+
+
+TODO:
+- better error printing
+
+
+
+
 
 
 - Lex into tokens
@@ -10,7 +19,6 @@
     - int:a = 1; -> to tokens
         - keyword, colon, identifier, operator/equals/assign, int_literal, semicolon
     - Tokens maybe in a dynamic list
-    - error token
 - parser
     - parsing the tokens
 - compiler
