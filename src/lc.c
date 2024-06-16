@@ -19,12 +19,13 @@ void readBytes(const char *fileName, char **buffer, int *length) {
 }
 
 int main(int argc, char **argv) {
+  char file[8] = "test.lep"; // For debugging
   if (argc < 2) {
     printf("Pass .lep file to compile. Usage:\n");
     printf("lc <file.lep>\n");
-    return 1;
+    // return 1;
   }
-  char *fileName = argv[1];
+  char *fileName = (argc < 2) ? file : argv[1];
 
   clock_t begin = clock();
 

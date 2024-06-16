@@ -4,6 +4,7 @@
 #include "../include/LList.h"
 #include "../include/token.h"
 #include <stdbool.h>
+#include <string.h>
 
 #define COMMENT_CHAR '#'
 
@@ -43,5 +44,7 @@ void addSynError(Lexer *lexer, synError * err);
 void printTokens(Lexer *lexer);
 void printErrors(Lexer *lexer);
 void printError(Lexer *lexer, synError *err);
+
+char* malStrncpy(const char *s, const size_t n);
 
 #endif

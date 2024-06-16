@@ -2,7 +2,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <assert.h>
 
 Lexer *initLexer() {
   Lexer *lexer = malloc(sizeof(Lexer));
@@ -39,7 +39,8 @@ void lex(Lexer *lexer) {
 token *getNextToken(Lexer *lexer) {
   int begI = lexer->srcPos;
   CLoc cLocB = lexer->codeLoc;
-  char* c = malloc(sizeof(char));
+  char* c = malloc(sizeof(char) + 1);
+  c[1] = '\0',
   *c = next(lexer);
   switch (*c) {
     case ' ':
@@ -73,8 +74,7 @@ token *getNextToken(Lexer *lexer) {
         while (isalpha(peek(lexer))) {
           next(lexer);
         }
-        char *tv = malloc((lexer->srcPos - begI) * sizeof(char));
-        strncpy(tv, lexer->src + begI, lexer->srcPos - begI);
+        char *tv = malStrncpy(lexer->src + begI, lexer->srcPos - begI);
         tokenType tt = isKeyword(lexer, tv);
         // tt = (tt >= 0) ? tt : T_IDENTIFIER;
         return makeToken(tt, tv, cLocB);
@@ -118,9 +118,16 @@ tokenType isKeyword(Lexer *lexer, const char* value) {
   return T_IDENTIFIER;
 }
 
+char* malStrncpy(const char *s, const size_t n) {
+  char *d = malloc(n + 1);
+  assert(d != NULL);
+  strncpy(d, s, n);
+  d[n] = '\0';
+  return d;
+}
+
 token* makeTokenN(Lexer* lexer, const tokenType type, const int beg, const CLoc cl) {
-  char* tval = malloc((lexer->srcPos - beg) * sizeof(char));
-  strncpy(tval, lexer->src + beg, lexer->srcPos - beg);
+  char* tval = malStrncpy(lexer->src + beg, lexer->srcPos - beg);
   return makeToken(type, tval, cl);
 }
 
