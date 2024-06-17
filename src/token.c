@@ -44,32 +44,36 @@ const char* tokenTypeToStr(tokenType type) {
       return "T_SLASH";
     case T_IDENTIFIER:
       return "T_IDENTIFIER";
-    case T_INT_LIT:
-      return "T_INT_LIT";
-    case T_CHAR_LIT:
-      return "T_CHAR_LIT";
-    case T_BOOL_LIT:
-      return "T_BOOL_LIT";
-    case T_STR_LIT:
-      return "T_STR_LIT";
-    case T_FLOAT_LIT:
-      return "T_FLOAT_LIT";
-    case T_INT:
-      return "T_INT";
-    case T_F:
-      return "T_F";
-    case T_CHAR:
-      return "T_CHAR";
-    case T_BOOL:
-      return "T_BOOL";
-    case T_STR:
-      return "T_STR";
-    case T_FLOAT:
-      return "T_FLOAT";
-    case T_VOID:
-      return "T_VOID";
-    case T_RET:
-      return "T_RET";
+    case T_LIT_INT:
+      return "T_LIT_INT";
+    case T_LIT_CHAR:
+      return "T_LIT_CHAR";
+    case T_LIT_BOOL:
+      return "T_LIT_BOOL";
+    case T_LIT_STR:
+      return "T_LIT_STR";
+    case T_LIT_FLOAT:
+      return "T_LIT_FLOAT";
+    case T_KW_INT:
+      return "T_KW_INT";
+    case T_KW_F:
+      return "T_KW_F";
+    case T_KW_CHAR:
+      return "T_KW_CHAR";
+    case T_KW_BOOL:
+      return "T_KW_BOOL";
+    case T_KW_STR:
+      return "T_KW_STR";
+    case T_KW_FLOAT:
+      return "T_KW_FLOAT";
+    case T_KW_VOID:
+      return "T_KW_VOID";
+    case T_KW_TRUE:
+      return "T_KW_TRUE";
+    case T_KW_FALSE:
+      return "T_KW_FALSE";
+    case T_KW_RET:
+      return "T_KW_RET";
     case T_ERROR:
       return "T_ERROR";
     case T_EOF:

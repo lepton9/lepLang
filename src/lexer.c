@@ -23,7 +23,7 @@ void freeLexer(Lexer *lexer) {
   free(lexer);
 }
 
-void lex(Lexer *lexer) {
+LList* lex(Lexer *lexer) {
   token *tok;
   while (!atEnd(lexer)) {
     tok = getNextToken(lexer);
@@ -34,6 +34,7 @@ void lex(Lexer *lexer) {
 
   token *t_eof = makeToken(T_EOF, NULL, lexer->codeLoc);
   addToken(lexer, t_eof);
+  return lexer->tokens;
 }
 
 token *getNextToken(Lexer *lexer) {
@@ -41,7 +42,7 @@ token *getNextToken(Lexer *lexer) {
   CLoc cLocB = lexer->codeLoc;
   char* c = malloc(sizeof(char) + 1);
   c[1] = '\0',
-  *c = next(lexer);
+  *c = advance(lexer);
   switch (*c) {
     case ' ':
       // token = makeToken(T_SPACE, c, cLocB);
@@ -64,7 +65,7 @@ token *getNextToken(Lexer *lexer) {
     case '/': return makeToken(T_SLASH, c, cLocB);
     case '-':
       if (peek(lexer) == '>') {
-        next(lexer);
+        advance(lexer);
         return makeTokenN(lexer, T_ARROW, begI, cLocB);
       }
       return makeToken(T_MINUS, c, cLocB);
@@ -72,7 +73,7 @@ token *getNextToken(Lexer *lexer) {
     default: {
       if (isalpha(*c)) {
         while (isalpha(peek(lexer))) {
-          next(lexer);
+          advance(lexer);
         }
         char *tv = malStrncpy(lexer->src + begI, lexer->srcPos - begI);
         tokenType tt = isKeyword(lexer, tv);
@@ -80,16 +81,16 @@ token *getNextToken(Lexer *lexer) {
         return makeToken(tt, tv, cLocB);
       }
       else if (isdigit(*c)) {
-        tokenType tt = T_INT_LIT;
+        tokenType tt = T_LIT_INT;
         while ((*c = peek(lexer)) && isdigit(*c)) {
-          next(lexer);
+          advance(lexer);
         }
         if (peek(lexer) == '.') {
-          next(lexer);
+          advance(lexer);
           if (isdigit(peek(lexer))) {
-            tt = T_FLOAT_LIT;
+            tt = T_LIT_FLOAT;
             while ((*c = peek(lexer)) && isdigit(*c)) {
-              next(lexer);
+              advance(lexer);
             }
           } else {
             addSynError(lexer, syntaxError(lexer, "Invalid float", begI, lexer->srcPos - begI));
@@ -107,14 +108,16 @@ token *getNextToken(Lexer *lexer) {
 }
 
 tokenType isKeyword(Lexer *lexer, const char* value) {
-  if (strcmp(value, "int") == 0) return T_INT;
-  if (strcmp(value, "char") == 0) return T_CHAR;
-  if (strcmp(value, "bool") == 0) return T_BOOL;
-  if (strcmp(value, "str") == 0) return T_STR;
-  if (strcmp(value, "float") == 0) return T_FLOAT;
-  if (strcmp(value, "void") == 0) return T_VOID;
-  if (strcmp(value, "f") == 0) return T_F;
-  if (strcmp(value, "ret") == 0) return T_RET;
+  if (strcmp(value, "int") == 0) return T_KW_INT;
+  if (strcmp(value, "char") == 0) return T_KW_CHAR;
+  if (strcmp(value, "bool") == 0) return T_KW_BOOL;
+  if (strcmp(value, "str") == 0) return T_KW_STR;
+  if (strcmp(value, "float") == 0) return T_KW_FLOAT;
+  if (strcmp(value, "void") == 0) return T_KW_VOID;
+  if (strcmp(value, "f") == 0) return T_KW_F;
+  if (strcmp(value, "true") == 0) return T_KW_TRUE;
+  if (strcmp(value, "false") == 0) return T_KW_FALSE;
+  if (strcmp(value, "ret") == 0) return T_KW_RET;
   return T_IDENTIFIER;
 }
 
@@ -174,7 +177,7 @@ char peek(Lexer *lexer) {
   // return lexer->src[lexer->srcPos + 1];
 }
 
-char next(Lexer *lexer) {
+char advance(Lexer *lexer) {
   lexer->codeLoc.column++;
   return lexer->src[lexer->srcPos++];
 }

@@ -1,9 +1,28 @@
-#include "../include/lexer.h"
+#include "../include/lc.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
-void readBytes(const char *fileName, char **buffer, int *length) {
+lc* initLC() {
+  lc* lepC = malloc(sizeof(lc));
+  lepC->lexer = initLexer();
+  lepC->parser = initParser();
+  return lepC;
+}
+
+void freeLC(lc *lc) {
+  freeLexer(lc->lexer);
+  freeParser(lc->parser);
+  free(lc);
+}
+
+void lccompile(lc *lc) {
+  LList* tokens = lex(lc->lexer);
+  lc->root = parse(lc->parser, tokens);
+}
+
+
+void readSrcFile(const char *fileName, char **buffer, int *length) {
   FILE *f = fopen(fileName, "rb");
 
   if (f) {
@@ -29,22 +48,22 @@ int main(int argc, char **argv) {
 
   clock_t begin = clock();
 
-  Lexer *lexer = initLexer();
-  readBytes(fileName, &lexer->src, &lexer->srcLen);
+  lc* lc = initLC();
+  readSrcFile(fileName, &lc->lexer->src, &lc->lexer->srcLen);
 
-  lex(lexer);
+  lccompile(lc);
 
   clock_t end = clock();
   double time = (double)(end - begin) / CLOCKS_PER_SEC;
 
-  printTokens(lexer);
-  printErrors(lexer);
+  printTokens(lc->lexer);
+  printErrors(lc->lexer);
 
-  printf("%s\n", lexer->src);
-  printf("Read %d characters\n", lexer->srcLen);
+  printf("%s\n", lc->lexer->src);
+  printf("Read %d characters\n", lc->lexer->srcLen);
   printf("Took %f s\n", time);
 
-  freeLexer(lexer);
+  freeLC(lc);
 
   return 0;
 }

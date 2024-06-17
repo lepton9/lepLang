@@ -27,13 +27,13 @@ typedef struct {
 Lexer *initLexer();
 void freeLexer(Lexer *lexer);
 
-void lex(Lexer *lexer); // Tokenize
+LList* lex(Lexer *lexer); // Tokenize
 
-token *getNextToken(Lexer *lexer); // getNextToken()
+token *getNextToken(Lexer *lexer);
 void addToken(Lexer *lexer, token *token);
 bool atEnd(Lexer *lexer);
 char peek(Lexer *lexer);
-char next(Lexer *lexer); // advance()
+char advance(Lexer *lexer);
 void nextLine(Lexer *lexer);
 tokenType isKeyword(Lexer *lexer, const char *value);
 
