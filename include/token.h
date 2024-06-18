@@ -17,6 +17,7 @@ typedef enum {
   T_NEWLINE,
 
   // Operators
+  T_OPERATOR,
   T_EQUALS,
   T_PLUS,
   T_MINUS,
@@ -41,6 +42,7 @@ typedef enum {
   T_KW_VOID,
   T_KW_TRUE,
   T_KW_FALSE,
+  T_KW_MAIN,
   T_KW_RET,
 
   T_ERROR,

@@ -1,6 +1,6 @@
 #include "../include/dlist.h"
 
-dlist *init_list_t(size_t item_size) {
+dlist *init_list(size_t item_size) {
   dlist *list = malloc(sizeof(dlist));
   list->size = 0;
   list->item_size = item_size;

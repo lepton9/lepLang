@@ -93,7 +93,7 @@ token *getNextToken(Lexer *lexer) {
               advance(lexer);
             }
           } else {
-            addSynError(lexer, syntaxError(lexer, "Invalid float", begI, lexer->srcPos - begI));
+            addSynError(lexer, lexerError(lexer, "Invalid float", begI, lexer->srcPos - begI));
             return NULL;
           }
         }
@@ -103,7 +103,7 @@ token *getNextToken(Lexer *lexer) {
     }
   }
 
-  addSynError(lexer, syntaxError(lexer, "No token match", begI, lexer->srcPos - begI));
+  addSynError(lexer, lexerError(lexer, "No token match", begI, lexer->srcPos - begI));
   return NULL;
 }
 
@@ -117,6 +117,7 @@ tokenType isKeyword(Lexer *lexer, const char* value) {
   if (strcmp(value, "f") == 0) return T_KW_F;
   if (strcmp(value, "true") == 0) return T_KW_TRUE;
   if (strcmp(value, "false") == 0) return T_KW_FALSE;
+  if (strcmp(value, "main") == 0) return T_KW_MAIN;
   if (strcmp(value, "ret") == 0) return T_KW_RET;
   return T_IDENTIFIER;
 }
@@ -134,8 +135,8 @@ token* makeTokenN(Lexer* lexer, const tokenType type, const int beg, const CLoc 
   return makeToken(type, tval, cl);
 }
 
-synError* syntaxError(Lexer *lexer, const char* msg, const int beg, const int len) {
-  synError *err = malloc(sizeof(synError));
+lexError* lexerError(Lexer *lexer, const char* msg, const int beg, const int len) {
+  lexError *err = malloc(sizeof(lexError));
   err->beg = beg;
   err->len = len;
   err->codeLoc = lexer->codeLoc;
@@ -144,16 +145,16 @@ synError* syntaxError(Lexer *lexer, const char* msg, const int beg, const int le
   return err;
 }
 
-void addSynError(Lexer *lexer, synError * err) {
+void addSynError(Lexer *lexer, lexError * err) {
   add_to_end(lexer->errors, err);
 }
 
-void printError(Lexer *lexer, synError *err) {
+void printError(Lexer *lexer, lexError *err) {
   printf("(%.*s) | %s at L%d C%d\n", err->len, lexer->src + err->beg, err->msg, err->codeLoc.line, err->codeLoc.column);
 }
 
 void printErrors(Lexer *lexer) {
-  printf("Syntax errors:\n");
+  printf("Lexing errors:\n");
   for (node *head=lexer->errors->head; head != NULL; head = head->next) {
     printError(lexer, head->data);
   }

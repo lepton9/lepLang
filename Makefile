@@ -9,7 +9,7 @@ CC := gcc
 TESTS := ./tests
 TEST_TARGETS := 
 
-OBJ := lexer parser LList token
+OBJ := lexer parser LList token ast dlist
 
 lc: $(addprefix $(OBJS)/,$(addsuffix .o,$(OBJ))) | $(BIN)
 	$(CC) $^ $(SRC)/lc.c -o $(BIN)/$@ $(LINK)

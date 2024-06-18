@@ -72,6 +72,8 @@ const char* tokenTypeToStr(tokenType type) {
       return "T_KW_TRUE";
     case T_KW_FALSE:
       return "T_KW_FALSE";
+    case T_KW_MAIN:
+      return "T_KW_MAIN";
     case T_KW_RET:
       return "T_KW_RET";
     case T_ERROR:

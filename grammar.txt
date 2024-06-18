@@ -1,5 +1,40 @@
 
 
+<func_definition> ::= <func_header> <func_body>
 
+<function_header> ::= "f" ":" <func_name> "(" [<parameter_list>] ")" "->" <type>
 
+<func_name> ::= <id> | "main"
+
+<function_body> ::= "{" <statements> "}"
+
+<parameter_list> ::= <parameter> | <parameter> "," <parameter_list>
+
+<parameter> ::= <type> ":" <id>
+
+<statements> ::= <statement> | <statement> <statements>
+
+<statement> ::= <variable_declaration> ";"
+		| <assignment> ";"
+		| <return_statement> ";"
+
+<variable_declaration> ::= <type> ":" <id> | <type> ":" <assignment>
+
+<return_statement> ::= "return" <expr>
+
+<assignment> ::= <id> "=" <expr>
+
+<expression> ::= <identifier> 
+               | <integer> 
+	       | <literal>
+               | <identifier> <operator> <identifier> 
+               | <identifier> <operator> <integer> 
+               | <integer> <operator> <identifier> 
+               | "(" <expression> ")" 
+               | <expression> <operator> <expression>
+
+<id> ::= <letter> {<letter>}*
+
+<type> ::= "int" | "float" | "str" | "bool" | "void" | "char"
+<operator> ::= "+" | "-" | "*" | "/"
 

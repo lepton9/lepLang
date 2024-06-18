@@ -13,7 +13,7 @@ typedef struct {
   int beg;
   int len;
   CLoc codeLoc;
-} synError;
+} lexError;
 
 typedef struct {
   LList *tokens;
@@ -38,12 +38,12 @@ void nextLine(Lexer *lexer);
 tokenType isKeyword(Lexer *lexer, const char *value);
 
 token* makeTokenN(Lexer *lexer, const tokenType type, const int beg, const CLoc cl);
-synError* syntaxError(Lexer *lexer, const char* msg, const int beg, const int len);
-void addSynError(Lexer *lexer, synError * err);
+lexError* lexerError(Lexer *lexer, const char* msg, const int beg, const int len);
+void addSynError(Lexer *lexer, lexError * err);
 
 void printTokens(Lexer *lexer);
 void printErrors(Lexer *lexer);
-void printError(Lexer *lexer, synError *err);
+void printError(Lexer *lexer, lexError *err);
 
 char* malStrncpy(const char *s, const size_t n);
 

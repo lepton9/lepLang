@@ -56,11 +56,11 @@ int main(int argc, char **argv) {
   clock_t end = clock();
   double time = (double)(end - begin) / CLOCKS_PER_SEC;
 
-  printTokens(lc->lexer);
-  printErrors(lc->lexer);
-
-  printf("%s\n", lc->lexer->src);
   printf("Read %d characters\n", lc->lexer->srcLen);
+  // printTokens(lc->lexer);
+  printErrors(lc->lexer);
+  // printf("%s\n", lc->lexer->src);
+
   printf("Took %f s\n", time);
 
   freeLC(lc);
