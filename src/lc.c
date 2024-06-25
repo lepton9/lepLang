@@ -59,6 +59,7 @@ int main(int argc, char **argv) {
   printf("Read %d characters\n", lc->lexer->srcLen);
   // printTokens(lc->lexer);
   printErrors(lc->lexer);
+  printAST(lc->root, 0);
   // printf("%s\n", lc->lexer->src);
 
   printf("Took %f s\n", time);

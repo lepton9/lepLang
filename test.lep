@@ -1,5 +1,5 @@
 
-f:sum(first:int, second:int) -> int {
+f:sum(int:first, int:second) -> int {
   int:total = first + second;
   ret total;
 }

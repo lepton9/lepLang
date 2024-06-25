@@ -3,6 +3,11 @@ DONE:
 
 TODO:
 - better error printing
+    - print error line and ^ below the error column
+- rest of the grammar parsing
+- assingment statements
+- function calls
+- assembler
 
 
 

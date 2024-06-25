@@ -1,0 +1,4 @@
+
+f:funcname(int:first, int:second) -> int {
+  ret 0;
+}

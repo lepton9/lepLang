@@ -154,7 +154,7 @@ void printError(Lexer *lexer, lexError *err) {
 }
 
 void printErrors(Lexer *lexer) {
-  printf("Lexing errors:\n");
+  // printf("Lexing errors:\n");
   for (node *head=lexer->errors->head; head != NULL; head = head->next) {
     printError(lexer, head->data);
   }

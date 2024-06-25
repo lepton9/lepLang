@@ -44,5 +44,5 @@ clean:
 	rm -rf $(TESTS)/bin/*
 
 run:
-	$(BIN)/lc test.lep
+	$(BIN)/lc parseTest.lep
 
