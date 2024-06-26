@@ -29,15 +29,16 @@
 
 <assignment> ::= <id> "=" <expr>
 
-<expression> ::= <identifier> 
-               | <integer> 
-	       | <literal>
-               | <identifier> <operator> <identifier> 
-               | <identifier> <operator> <integer> 
-               | <integer> <operator> <identifier> 
-               | "(" <expression> ")" 
-               | <expression> <operator> <expression>
-               | <func_call>
+<expression> ::= <term> | <term> <operator> <expression>
+
+<term> ::= <id>
+         | <literal>
+         | <identifier> <operator> <identifier> 
+         | <identifier> <operator> <literal> 
+         | <literal> <operator> <identifier> 
+         | "(" <expression> ")" 
+         | <expression> <operator> <expression>
+         | <func_call>
 
 <id> ::= <letter> {<letter>}*
 

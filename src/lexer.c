@@ -48,6 +48,7 @@ token *getNextToken(Lexer *lexer) {
   int begI = lexer->srcPos;
   CLoc cLocB = lexer->codeLoc;
   char* c = malloc(sizeof(char) + 1);
+  char* tv;
   c[1] = '\0',
   *c = advance(lexer);
   switch (*c) {
@@ -79,13 +80,24 @@ token *getNextToken(Lexer *lexer) {
         return makeTokenN(lexer, T_ARROW, begI, cLocB);
       }
       return makeToken(T_MINUS, c, cLocB);
-
+    case '\"':
+      while (advance(lexer) != '\"') {}
+      tv = malStrncpy(lexer->src + begI, lexer->srcPos - begI);
+      return makeToken(T_LIT_STR, tv, cLocB);
+    case '\'':
+      if (advance(lexer) != '\'') {
+        if (advance(lexer) != '\'') {
+          addSynError(lexer, lexerError(lexer, "Invalid char", begI, lexer->srcPos - begI));
+        }
+      }
+      tv = malStrncpy(lexer->src + begI, lexer->srcPos - begI);
+      return makeToken(T_LIT_CHAR, tv, cLocB);
     default: {
       if (isalpha(*c)) {
         while (isalpha(peek(lexer))) {
           advance(lexer);
         }
-        char *tv = malStrncpy(lexer->src + begI, lexer->srcPos - begI);
+        tv = malStrncpy(lexer->src + begI, lexer->srcPos - begI);
         tokenType tt = isKeyword(lexer, tv);
         // tt = (tt >= 0) ? tt : T_IDENTIFIER;
         return makeToken(tt, tv, cLocB);

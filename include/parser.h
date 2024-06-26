@@ -19,7 +19,9 @@ void freeParser(parser *p);
 AST *parse(parser *p);
 // void match(tokenType type);
 int isType(parser* p);
+int isLiteral(parser* p);
 int acceptOp(parser* p);
+int acceptLiteral(parser* p);
 int acceptType(parser* p);
 int accept(parser *p, tokenType type);
 int expect(parser *p, tokenType type);
@@ -27,6 +29,7 @@ token *nextToken(parser *p);
 void errorSyntax(parser* p, const char *msg, const char* expected);
 token* peekToken(parser* p);
 
+AST* parse_program(parser* p);
 
 AST* parse_func_def(parser* p);
 AST* parse_func_header(parser* p);

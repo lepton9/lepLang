@@ -58,6 +58,9 @@ void printAST(AST *node, int indent) {
     case AST_OPERATOR:
       printf("Operator: %s\n", node->value->value);
       break;
+    case AST_VALUE:
+      printf("Value: %s\n", node->value->value);
+      break;
     default:
       printf("Undefined\n");
   }

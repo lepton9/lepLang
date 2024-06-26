@@ -19,6 +19,9 @@ void freeLC(lc *lc) {
 
 void lccompile(lc *lc) {
   LList* tokens = lex(lc->lexer);
+  if (lc->lexer->errors->size != 0) {
+    return;
+  }
   lc->root = parse(lc->parser);
 }
 

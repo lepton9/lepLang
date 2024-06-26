@@ -1,12 +1,11 @@
 DONE:
-- assingment statements
-- variable decl
+- function calls
+- literals
 
 TODO:
 - better error printing
 - rest of the grammar parsing
-- function calls
-- assembler
+- symbol table
 
 
 

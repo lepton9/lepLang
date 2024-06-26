@@ -14,7 +14,7 @@ AST *parse(parser *p) {
   p->node = p->lexer->tokens->head;
   p->token = p->lexer->tokens->head->data;
 
-  AST* root = parse_func_def(p);
+  AST* root = parse_program(p);
   return root;
 }
 
@@ -78,8 +78,24 @@ int isType(parser* p) {
   }
 }
 
-int acceptLit(parser* p) {
+int acceptLiteral(parser* p) {
+  if (isLiteral(p)) {
+    return accept(p, p->token->type);
+  } else {
+    return 0;
+  }
+}
+
+int isLiteral(parser* p) {
   switch (p->token->type) {
+    case T_LIT_INT:
+    case T_LIT_CHAR:
+    case T_LIT_STR:
+    case T_LIT_FLOAT:
+    case T_LIT_BOOL:
+    case T_KW_TRUE:
+    case T_KW_FALSE:
+      return 1;
     default:
       return 0;
   }
@@ -92,6 +108,10 @@ token *nextToken(parser *p) {
     return p->token;
   }
   return NULL;
+}
+
+AST* parse_program(parser* p) {
+  return parse_func_def(p);
 }
 
 AST* parse_id(parser* p) {
@@ -172,12 +192,12 @@ AST* parse_func_param(parser* p) {
 AST* parse_term(parser *p) {
   AST* term = NULL;
   token* t = p->token;
-  if (accept(p, T_IDENTIFIER)) {
+  if (p->token->type == T_IDENTIFIER && peekToken(p)->type == T_PAREN_L) {
+    term = parse_fcall(p);
+  } else if (accept(p, T_IDENTIFIER)) {
     term = initAST(AST_ID, t);
-
-  } else if (accept(p, T_LIT_INT)) {
+  } else if (acceptLiteral(p)) {
     term = initAST(AST_VALUE, t);
-
   } else if (accept(p, T_PAREN_L)) {
     term = parse_expr(p);
     expect(p, T_PAREN_R);

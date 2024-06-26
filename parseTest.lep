@@ -1,7 +1,10 @@
 
 # comment
 f:funcname(int:first, int:second) -> int {
+  str:text = "abc";
+  char:c= 'a';
   int:a = 2;
-  fcall(a, b);
+  bool:boolean = true;
+  int:b = fcall(a, b) + 5;
   ret 0;
 }
