@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 Lexer *initLexer() {
   Lexer *lexer = malloc(sizeof(Lexer));
@@ -187,3 +188,29 @@ void nextLine(Lexer *lexer) {
   lexer->codeLoc.line++;
   lexer->codeLoc.column = 1;
 }
+
+
+char* getLine(Lexer* lexer, const int n) {
+  int startI = 0;
+  int endI = -1;
+  int curLine = 1;
+  char* line;
+  for (int i = 0; i < lexer->srcLen; i++) {
+    if (curLine == n) {
+      startI = i;
+      for (int ie = i; ie < lexer->srcLen; ie++) {
+        if (lexer->src[ie] == '\n') {
+          endI = ie - 1;
+          break;
+        }
+      }
+      break;
+    }
+    if (lexer->src[i] == '\n') curLine++;
+  }
+  int len = endI - startI + 1;
+  line = malloc(len + 1);
+  memcpy(line, lexer->src + startI, len);
+  return line;
+}
+

@@ -2,28 +2,28 @@
 #define PARSER_H
 
 #include "../include/LList.h"
-// #include "../include/lexer.h"
+#include "../include/lexer.h"
 #include "../include/ast.h"
 #include "../include/token.h"
 
 typedef struct {
-  LList *tokens;
-  // Lexer *lexer;
+  // LList *tokens;
+  Lexer *lexer;
 
   node *node;
   token *token;
 } parser;
 
-parser *initParser();
+parser *initParser(Lexer* lexer);
 void freeParser(parser *p);
-AST *parse(parser *p, LList *tokens);
+AST *parse(parser *p);
 // void match(tokenType type);
 int acceptOp(parser* p);
 int acceptType(parser* p);
 int accept(parser *p, tokenType type);
 int expect(parser *p, tokenType type);
 token *nextToken(parser *p);
-void errorSyntax(const char *msg, const token* t, const char* expected);
+void errorSyntax(parser* p, const char *msg, const char* expected);
 // token *peek(parser *p);
 
 

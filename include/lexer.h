@@ -47,4 +47,6 @@ void printError(Lexer *lexer, lexError *err);
 
 char* malStrncpy(const char *s, const size_t n);
 
+char* getLine(Lexer* lexer, const int line);
+
 #endif

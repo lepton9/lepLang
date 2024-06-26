@@ -2,17 +2,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-parser *initParser() {
+parser *initParser(Lexer* lexer) {
   parser *p = malloc(sizeof(parser));
+  p->lexer = lexer;
   return p;
 }
 
 void freeParser(parser *p) { free(p); }
 
-AST *parse(parser *p, LList* tokens) {
-  p->tokens = tokens;
-  p->node = p->tokens->head;
-  p->token = p->tokens->head->data;
+AST *parse(parser *p) {
+  p->node = p->lexer->tokens->head;
+  p->token = p->lexer->tokens->head->data;
 
   AST* root = parse_func_def(p);
   return root;
@@ -30,7 +30,7 @@ int expect(parser *p, tokenType type) {
   if (accept(p, type)) {
     return 1;
   }
-  errorSyntax("Unexpected token", p->token, tokenTypeToStr(type));
+  errorSyntax(p, "Unexpected token", tokenTypeToStr(type));
   return 0;
 }
 
@@ -181,7 +181,7 @@ AST* parse_term(parser *p) {
     term = parse_expr(p);
     expect(p, T_PAREN_R);
   } else {
-    errorSyntax("Unknown term", p->token, NULL);
+    errorSyntax(p, "Unknown term", NULL);
   }
   return term;
 }
@@ -222,7 +222,7 @@ AST* parse_statement(parser *p) {
     statement = parse_return(p);
     expect(p, T_SEMICOLON);
   } else {
-    errorSyntax("Unknown statement", p->token, NULL);
+    errorSyntax(p, "Unknown statement", NULL);
     exit(1);
   }
   return statement;
@@ -249,13 +249,24 @@ AST* parse_expr(parser* p) {
   return term;
 }
 
-
-void errorSyntax(const char *msg, const token* t, const char* expected) {
-  if (expected) {
-    printf("[Parser] %s : %s != %s, at L%-2d C%d\n", msg, tokenTypeToStr(t->type), expected, t->loc.line, t->loc.column);
-  } else {
-    printf("[Parser] %s : %s, at L%-2d C%d\n", msg, tokenTypeToStr(t->type), t->loc.line, t->loc.column);
+int digits(int n)
+{
+  int count = 0;
+  if (n > 0) {
+      count++;
+      digits(n / 10);
   }
+  return count;
+}
+
+void errorSyntax(parser* p, const char *msg, const char* expected) {
+  if (expected) {
+    printf("[Parser] %s : %s != %s, at L%-2d C%d\n", msg, tokenTypeToStr(p->token->type), expected, p->token->loc.line, p->token->loc.column);
+  } else {
+    printf("[Parser] %s : %s, at L%-2d C%d\n", msg, tokenTypeToStr(p->token->type), p->token->loc.line, p->token->loc.column);
+  }
+  printf("%d: %s\n", p->token->loc.line, getLine(p->lexer, p->token->loc.line));
+  printf("%*c^\n", p->token->loc.column + digits(p->token->loc.line) + 1, ' ');
   exit(1);
 }
 

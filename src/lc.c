@@ -6,7 +6,7 @@
 lc* initLC() {
   lc* lepC = malloc(sizeof(lc));
   lepC->lexer = initLexer();
-  lepC->parser = initParser();
+  lepC->parser = initParser(lepC->lexer);
   return lepC;
 }
 
@@ -18,7 +18,7 @@ void freeLC(lc *lc) {
 
 void lccompile(lc *lc) {
   LList* tokens = lex(lc->lexer);
-  lc->root = parse(lc->parser, tokens);
+  lc->root = parse(lc->parser);
 }
 
 
