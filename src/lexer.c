@@ -38,6 +38,12 @@ LList* lex(Lexer *lexer) {
   return lexer->tokens;
 }
 
+void comment(Lexer* lexer) {
+  while(peek(lexer) != '\n') {
+    getNextToken(lexer);
+  }
+}
+
 token *getNextToken(Lexer *lexer) {
   int begI = lexer->srcPos;
   CLoc cLocB = lexer->codeLoc;
@@ -51,6 +57,9 @@ token *getNextToken(Lexer *lexer) {
     case '\n':
       // token = makeToken(T_NEWLINE, c, cLocB);
       nextLine(lexer);
+      return NULL;
+    case '#':
+      comment(lexer);
       return NULL;
     case ':': return makeToken(T_COLON, c, cLocB);
     case ';': return makeToken(T_SEMICOLON, c, cLocB);

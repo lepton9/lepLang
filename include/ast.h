@@ -9,6 +9,8 @@ typedef struct AST_NODE {
     AST_STATEMENT,
     AST_VARIABLE,
     AST_TYPE,
+    AST_FCALL,
+    AST_ARGS,
     AST_FUNCTION,
     AST_PARAMETER,
     AST_ASSIGNMENT,

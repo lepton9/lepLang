@@ -25,7 +25,7 @@ int accept(parser *p, tokenType type);
 int expect(parser *p, tokenType type);
 token *nextToken(parser *p);
 void errorSyntax(parser* p, const char *msg, const char* expected);
-// token *peek(parser *p);
+token* peekToken(parser* p);
 
 
 AST* parse_func_def(parser* p);
@@ -34,6 +34,8 @@ AST* parse_func_body(parser* p);
 AST* parse_func_params(parser* p);
 AST* parse_func_param(parser* p);
 
+AST* parse_fcall(parser* p);
+AST* parse_fcall_args(parser* p);
 
 AST* parse_assignment(parser* p);
 AST* parse_var_decl(parser* p);

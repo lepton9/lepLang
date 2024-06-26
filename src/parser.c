@@ -18,6 +18,10 @@ AST *parse(parser *p) {
   return root;
 }
 
+token* peekToken(parser* p) {
+  return p->node->next->data;
+}
+
 int accept(parser* p, tokenType type) {
   if (p->token->type == type) {
     nextToken(p);
@@ -183,20 +187,6 @@ AST* parse_term(parser *p) {
   return term;
 }
 
-
-AST* parse_statements(parser *p) {
-  AST *statement = parse_statement(p);
-  AST *statement_list = statement;
-  while (p->token->type != T_BRACE_R) {
-    AST *next_statement = parse_statement(p);
-    AST *new_statement_list = initAST(AST_STATEMENT, NULL);
-    new_statement_list->l = statement_list;
-    new_statement_list->r = next_statement;
-    statement_list = new_statement_list;
-  }
-  return statement_list;
-}
-
 AST* parse_var_decl(parser* p) {
   AST* type = initAST(AST_TYPE, p->token);
   acceptType(p);
@@ -228,8 +218,42 @@ AST* parse_assignment(parser* p) {
   return assignment;
 }
 
-AST* parse_func_call(parser* p) {
-  return NULL;
+AST* parse_fcall_args(parser* p) {
+  AST* arg = parse_expr(p);
+  AST* args = arg;
+  while(accept(p, T_COMMA)) {
+    AST* next_arg = parse_expr(p);
+    AST* new_args = initAST(AST_ARGS, NULL);
+    new_args->l = args;
+    new_args->r = next_arg;
+    args = new_args;
+  }
+  return args;
+}
+
+AST* parse_fcall(parser* p) {
+  AST* id = initAST(AST_ID, p->token);
+  expect(p, T_IDENTIFIER);
+  expect(p, T_PAREN_L);
+  AST* args = parse_fcall_args(p);
+  AST* func_call = initAST(AST_FCALL, NULL);
+  func_call->l = id;
+  func_call->r = args;
+  expect(p, T_PAREN_R);
+  return func_call;
+}
+
+AST* parse_statements(parser *p) {
+  AST *statement = parse_statement(p);
+  AST *statement_list = statement;
+  while (p->token->type != T_BRACE_R) {
+    AST *next_statement = parse_statement(p);
+    AST *new_statement_list = initAST(AST_STATEMENT, NULL);
+    new_statement_list->l = statement_list;
+    new_statement_list->r = next_statement;
+    statement_list = new_statement_list;
+  }
+  return statement_list;
 }
 
 AST* parse_statement(parser *p) {
@@ -237,6 +261,8 @@ AST* parse_statement(parser *p) {
   token* t = p->token;
   if (isType(p)) {
     statement = parse_var_decl(p);
+  } else if (p->token->type == T_IDENTIFIER && peekToken(p)->type == T_PAREN_L) {
+    statement = parse_fcall(p);
   } else if (p->token->type == T_IDENTIFIER) {
     statement = parse_assignment(p);
   } else if (p->token->type == T_KW_RET) {

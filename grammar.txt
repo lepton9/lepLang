@@ -19,6 +19,10 @@
 		| <return_statement> ";"
                 | <func_call> ";"
 
+<func_call> ::= <id> "(" [<arguments>] ")"
+
+<arguments> ::= <expr> | <expr> "," <arguments>
+
 <variable_declaration> ::= <type> ":" <id> | <type> ":" <assignment>
 
 <return_statement> ::= "return" <expr>
@@ -33,6 +37,7 @@
                | <integer> <operator> <identifier> 
                | "(" <expression> ")" 
                | <expression> <operator> <expression>
+               | <func_call>
 
 <id> ::= <letter> {<letter>}*
 
