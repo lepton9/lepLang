@@ -52,21 +52,23 @@ int acceptOp(parser* p) {
 }
 
 int acceptType(parser* p) {
+  if (isType(p)) {
+    return accept(p, p->token->type);
+  } else {
+    return 0;
+  }
+}
+
+int isType(parser* p) {
   switch(p->token->type) {
     case T_KW_INT:
-      return accept(p, T_KW_INT);
     case T_KW_F:
-      return accept(p, T_KW_F);
     case T_KW_CHAR:
-      return accept(p, T_KW_CHAR);
     case T_KW_BOOL:
-      return accept(p, T_KW_BOOL);
     case T_KW_STR:
-      return accept(p, T_KW_STR);
     case T_KW_FLOAT:
-      return accept(p, T_KW_FLOAT);
     case T_KW_VOID:
-      return accept(p, T_KW_VOID);
+      return 1;
     default:
       return 0;
   }
@@ -91,11 +93,6 @@ token *nextToken(parser *p) {
 AST* parse_id(parser* p) {
   token* t = p->token;
   expect(p, T_IDENTIFIER);
-  // if (accept(p, T_EQUALS)) {
-  //   AST* ast = initAST(AST_ASSIGNMENT, t);
-  //   return ast;
-  // }
-  // AST* ast = initAST(AST_VARIABLE, t);
   AST* ast = initAST(AST_ID, t);
   return ast;
 }
@@ -201,30 +198,54 @@ AST* parse_statements(parser *p) {
 }
 
 AST* parse_var_decl(parser* p) {
-  return NULL;
+  AST* type = initAST(AST_TYPE, p->token);
+  acceptType(p);
+  expect(p, T_COLON);
+  AST* id = initAST(AST_ID, p->token);
+  expect(p, T_IDENTIFIER);
+  AST* var = initAST(AST_VARIABLE, NULL);
+  var->l = type;
+  var->r = id;
+  if (p->token->type == T_EQUALS) {
+    AST* assignment = initAST(AST_ASSIGNMENT, p->token);
+    expect(p, T_EQUALS);
+    AST* expr = parse_expr(p);
+    assignment->l = id;
+    assignment->r = expr;
+    var->r = assignment;
+  }
+  return var;
 }
 
 AST* parse_assignment(parser* p) {
+  AST* id = initAST(AST_ID, p->token);
+  expect(p, T_IDENTIFIER);
+  AST* assignment = initAST(AST_ASSIGNMENT, p->token);
+  expect(p, T_EQUALS);
+  AST* expr = parse_expr(p);
+  assignment->l = id;
+  assignment->r = expr;
+  return assignment;
+}
+
+AST* parse_func_call(parser* p) {
   return NULL;
 }
 
 AST* parse_statement(parser *p) {
   AST *statement = NULL;
   token* t = p->token;
-  if (acceptType(p)) {
+  if (isType(p)) {
     statement = parse_var_decl(p);
-    expect(p, T_SEMICOLON);
-  } else if (accept(p, T_IDENTIFIER)) {
+  } else if (p->token->type == T_IDENTIFIER) {
     statement = parse_assignment(p);
-    expect(p, T_SEMICOLON);
-  }
-  if (p->token->type == T_KW_RET) {
+  } else if (p->token->type == T_KW_RET) {
     statement = parse_return(p);
-    expect(p, T_SEMICOLON);
   } else {
     errorSyntax(p, "Unknown statement", NULL);
     exit(1);
   }
+  expect(p, T_SEMICOLON);
   return statement;
 }
 

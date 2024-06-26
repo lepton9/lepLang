@@ -1,4 +1,7 @@
 
 f:funcname(int:first, int:second) -> int {
+  int:a = 2;
+  a = 3;
+  int:b;
   ret 0;
 }

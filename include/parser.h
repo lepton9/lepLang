@@ -18,6 +18,7 @@ parser *initParser(Lexer* lexer);
 void freeParser(parser *p);
 AST *parse(parser *p);
 // void match(tokenType type);
+int isType(parser* p);
 int acceptOp(parser* p);
 int acceptType(parser* p);
 int accept(parser *p, tokenType type);

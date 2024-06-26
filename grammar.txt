@@ -17,6 +17,7 @@
 <statement> ::= <variable_declaration> ";"
 		| <assignment> ";"
 		| <return_statement> ";"
+                | <func_call> ";"
 
 <variable_declaration> ::= <type> ":" <id> | <type> ":" <assignment>
 

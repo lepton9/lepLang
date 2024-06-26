@@ -1,11 +1,10 @@
 DONE:
-- print error line and ^ below the error column
-
+- assingment statements
+- variable decl
 
 TODO:
 - better error printing
 - rest of the grammar parsing
-- assingment statements
 - function calls
 - assembler
 

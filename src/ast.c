@@ -13,9 +13,11 @@ AST *initAST(int type, token *t) {
 }
 
 void freeAST(AST *ast) {
-  // free_list(ast->children);
-  // free(ast->value);
-  free(ast);
+  if (ast) {
+    freeAST(ast->l);
+    freeAST(ast->r);
+    free(ast);
+  }
 }
 
 void printAST(AST *node, int indent) {
@@ -34,6 +36,9 @@ void printAST(AST *node, int indent) {
       break;
     case AST_PARAMETER:
       printf("Parameter\n");
+      break;
+    case AST_VARIABLE:
+      printf("Variable\n");
       break;
     case AST_ASSIGNMENT:
       printf("Assignment\n");

@@ -13,6 +13,7 @@ lc* initLC() {
 void freeLC(lc *lc) {
   freeLexer(lc->lexer);
   freeParser(lc->parser);
+  freeAST(lc->root);
   free(lc);
 }
 
@@ -60,6 +61,7 @@ int main(int argc, char **argv) {
   // printTokens(lc->lexer);
   printErrors(lc->lexer);
   printAST(lc->root, 0);
+  print_ast(lc->root, 0);
   // printf("%s\n", lc->lexer->src);
 
   printf("Took %f s\n", time);
