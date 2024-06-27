@@ -1,10 +1,17 @@
 
-# comment
+float:x = 1.23;
+char:g = 's';
+bool:h = false;
+
 f:funcname(int:first, int:second) -> int {
   str:text = "abc";
   char:c= 'a';
   int:a = 2;
-  bool:boolean = true;
-  int:b = fcall(a, b) + 5;
+  a = 3;
   ret 0;
+}
+
+f:main() -> int {
+  int:r = funcname(1, 2, 3);
+  ret r;
 }

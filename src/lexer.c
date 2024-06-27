@@ -81,7 +81,12 @@ token *getNextToken(Lexer *lexer) {
       }
       return makeToken(T_MINUS, c, cLocB);
     case '\"':
-      while (advance(lexer) != '\"') {}
+      while (advance(lexer) != '\"') {
+        if (peek(lexer) == ';') {
+          addSynError(lexer, lexerError(lexer, "No closing \"", begI, lexer->srcPos - begI));
+          break;
+        }
+      }
       tv = malStrncpy(lexer->src + begI, lexer->srcPos - begI);
       return makeToken(T_LIT_STR, tv, cLocB);
     case '\'':

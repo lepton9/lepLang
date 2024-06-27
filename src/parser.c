@@ -111,7 +111,25 @@ token *nextToken(parser *p) {
 }
 
 AST* parse_program(parser* p) {
-  return parse_func_def(p);
+  AST* program = initAST(AST_PROGRAM, NULL);
+  AST* cur = program;
+  while(p->token->type != T_EOF) {
+    AST* d = NULL;
+    if (p->token->type == T_KW_F) {
+      d = parse_func_def(p);
+    }
+    else if (isType(p)) {
+      d = parse_var_decl(p);
+      expect(p, T_SEMICOLON);
+    } else {
+      errorSyntax(p, "Unexpected definition", tokenTypeToStr(p->token->type));
+    }
+    if (d) {
+      cur->next = d;
+      cur = d;
+    }
+  }
+  return program;
 }
 
 AST* parse_id(parser* p) {
@@ -140,39 +158,44 @@ AST* parse_func_def(parser* p) {
 }
 
 AST* parse_func_header(parser* p) {
-  AST* name = parse_id(p);
+  AST* name = NULL;
+  if (p->token->type == T_KW_MAIN) {
+    name = initAST(AST_MAIN, p->token);
+    expect(p, T_KW_MAIN);
+  } else {
+    name = parse_id(p);
+  }
   expect(p, T_PAREN_L);
   AST* params = parse_func_params(p);
   expect(p, T_PAREN_R);
   expect(p, T_ARROW);
   AST* ret_type = parse_type(p);
 
-  AST* header = initAST(AST_FUNCTION, NULL);
-  header->l= name;
-  header->r= initAST(AST_PARAMETER, NULL);
-  header->r->l= params;
-  header->r->r= ret_type;
+  AST* header = initAST(AST_FHEADER, NULL);
+  header->l = name;
+  name->next = params;
+  params->next = ret_type;
   return header;
 }
 
 AST* parse_func_body(parser* p) {
   expect(p, T_BRACE_L);
-  AST* body = parse_statements(p);
+  AST* body = initAST(AST_FBODY, NULL);
+  body->l = parse_statements(p);
   expect(p, T_BRACE_R);
   return body;
 }
 
 AST* parse_func_params(parser* p) {
-  AST* param = parse_func_param(p);
-  AST* param_list = param;
+  AST* params = initAST(AST_PARAMETERS, NULL);
+  params->l = parse_func_param(p);
+  AST* cur = params->l;
   while(accept(p, T_COMMA)) {
-    AST* next_param = parse_func_param(p);
-    AST* new_param_list = initAST(AST_PARAMETER, NULL);
-    new_param_list->l = param_list;
-    new_param_list->r = next_param;
-    param_list = new_param_list;
+    AST* param = parse_func_param(p);
+    cur->next = param;
+    cur = param;
   }
-  return param_list;
+  return params;
 }
 
 AST* parse_func_param(parser* p) {
@@ -239,14 +262,13 @@ AST* parse_assignment(parser* p) {
 }
 
 AST* parse_fcall_args(parser* p) {
-  AST* arg = parse_expr(p);
-  AST* args = arg;
+  AST* args = initAST(AST_FARGUMENTS, NULL);
+  args->l = parse_expr(p);
+  AST* cur = args->l;
   while(accept(p, T_COMMA)) {
-    AST* next_arg = parse_expr(p);
-    AST* new_args = initAST(AST_ARGS, NULL);
-    new_args->l = args;
-    new_args->r = next_arg;
-    args = new_args;
+    AST* arg = parse_expr(p);
+    cur->next = arg;
+    cur = arg;
   }
   return args;
 }
@@ -264,16 +286,15 @@ AST* parse_fcall(parser* p) {
 }
 
 AST* parse_statements(parser *p) {
-  AST *statement = parse_statement(p);
-  AST *statement_list = statement;
+  // AST *statement = parse_statement(p);
+  AST *statements = initAST(AST_STATEMENT, NULL);
+  AST *cur = statements;
   while (p->token->type != T_BRACE_R) {
     AST *next_statement = parse_statement(p);
-    AST *new_statement_list = initAST(AST_STATEMENT, NULL);
-    new_statement_list->l = statement_list;
-    new_statement_list->r = next_statement;
-    statement_list = new_statement_list;
+    cur->next = next_statement;
+    cur = next_statement;
   }
-  return statement_list;
+  return statements->next;
 }
 
 AST* parse_statement(parser *p) {

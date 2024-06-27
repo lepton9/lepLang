@@ -1,4 +1,5 @@
 
+<program> ::= <func_definition> | <variable_declaration>
 
 <func_definition> ::= <func_header> <func_body>
 

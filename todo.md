@@ -1,11 +1,12 @@
 DONE:
-- function calls
-- literals
+- better ast structure
+- parses the program
 
 TODO:
 - better error printing
 - rest of the grammar parsing
 - symbol table
+- type checking
 
 
 
