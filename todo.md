@@ -1,12 +1,17 @@
 DONE:
-- better ast structure
-- parses the program
 
 TODO:
+- tests for hashtab
 - better error printing
 - rest of the grammar parsing
-- symbol table
-- type checking
+- semantic analysis
+    - type checking
+    - scope resolution
+        - Variables and functions declares before use, scope rules
+    - symbol table
+        - Keep track of variable and function declarations and their attributes
+    - other semantic rules
+- intermediate code generation
 
 
 

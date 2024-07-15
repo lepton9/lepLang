@@ -32,7 +32,6 @@ typedef struct AST_NODE {
   struct AST_NODE* l;
   struct AST_NODE* r;
   struct AST_NODE* next;
-  // dlist *children;
 } AST;
 
 AST *initAST(int type, token* t);

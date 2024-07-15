@@ -9,7 +9,6 @@ AST *initAST(int type, token *t) {
   ast->l = NULL;
   ast->r = NULL;
   ast->next = NULL;
-  // ast->children = init_list(sizeof(AST));;
   return ast;
 }
 

@@ -82,7 +82,7 @@ token *getNextToken(Lexer *lexer) {
       return makeToken(T_MINUS, c, cLocB);
     case '\"':
       while (advance(lexer) != '\"') {
-        if (peek(lexer) == ';') {
+        if (atEnd(lexer)) {
           addSynError(lexer, lexerError(lexer, "No closing \"", begI, lexer->srcPos - begI));
           break;
         }
