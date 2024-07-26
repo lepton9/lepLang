@@ -43,6 +43,7 @@ stEntry* lookup_scope(symtab* st, const char* key);
 void checkAST(AST* root);
 void semanticAnalysis(symtabStack* sts, AST* ast);
 
+bool typecheck_fcall(symtabStack* sts, AST* fcall);
 bool typecheck_assignment(symtabStack* sts, AST* lhs, AST* rhs);
 int typecheck_operator(symtabStack* sts, AST* lhs, AST* rhs);
 bool typecheck_expr(symtabStack* sts, AST* ast);

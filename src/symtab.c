@@ -21,6 +21,10 @@ void freeSymbolTable(symtab* st) {
 void free_stEntry(stEntry* entry) {
   free(entry->name);
   free(entry->usageLines);
+  if (entry->f_info) {
+    free(entry->f_info->param_types);
+    free(entry->f_info);
+  }
   free(entry);
 }
 

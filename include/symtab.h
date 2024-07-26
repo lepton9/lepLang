@@ -6,6 +6,12 @@
 #include "../include/LList.h"
 
 typedef struct {
+  int ret_type;
+  size_t n_params;
+  int* param_types;
+} func_info;
+
+typedef struct {
   char* name;
   int type;
   char* scope;
@@ -13,6 +19,7 @@ typedef struct {
   LList* usageLines;
   size_t size;
   int address;
+  func_info* f_info;
   AST* node;
 } stEntry;
 

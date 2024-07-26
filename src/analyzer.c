@@ -74,6 +74,7 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
     case AST_FUNCTION: {
       AST* header = ast->l;
       AST* body = ast->r;
+      AST* param = header->l->next->l;
       token* name = header->l->value;
       if (lookup_all(sts, name->value)) {
         printf("Function %s already defined\n", name->value);
@@ -81,6 +82,17 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
       }
       stEntry* f = newVariable(sts, name->value, F);
       f->declLine = name->loc.line;
+      f->f_info = malloc(sizeof(func_info));
+      f->f_info->ret_type = ast->l->l->next->next->value->type;
+      f->f_info->n_params = 0;
+      // f_info->param_types = malloc(sizeof(int));
+      while (param) {
+        f->f_info->param_types = realloc(f->f_info->param_types, sizeof(int) * f->f_info->n_params + 1);
+        f->f_info->param_types[f->f_info->n_params] = convertType(param->l->value->type);
+        assert(param->type == AST_VARIABLE);
+        f->f_info->n_params++;
+        param = param->next;
+      }
       enter_scope(sts);
       {
         semanticAnalysis(sts, ast->l);
@@ -102,16 +114,23 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
       var->declLine = id->value->loc.line;
       break;
     }
-    case AST_ASSIGNMENT:
-      break;
-    case AST_OPERATOR: {
-      AST* lhs = ast->l;
-      AST* rhs = ast->r;
-      int valid = typecheck_operator(sts, lhs, rhs);
-      assert(valid >= 0);
+    case AST_ASSIGNMENT: {
+      bool valid = typecheck_assignment(sts, ast->l, ast->r);
+      if (!valid) {
+        printf("Assignment not valid\n");
+        exit(1);
+      }
       semanticAnalysis(sts, ast->next);
       return;
     }
+    // case AST_OPERATOR: {
+    //   AST* lhs = ast->l;
+    //   AST* rhs = ast->r;
+    //   int valid = typecheck_operator(sts, lhs, rhs);
+    //   assert(valid >= 0);
+    //   semanticAnalysis(sts, ast->next);
+    //   return;
+    // }
     default:
       break;
   }
@@ -162,12 +181,60 @@ bool matchType(const int a, const int b) {
   return convertType(a) == convertType(b);
 }
 
+bool typecheck_fcall(symtabStack* sts, AST* fcall) {
+  return 0;
+}
+
+bool typecheck_assignment(symtabStack* sts, AST* lhs, AST* rhs) {
+  int lhs_type, rhs_type;
+  char* id = lhs->value->value;
+  stEntry* var = lookup_all(sts, id);
+  if (!var) {
+    printf("Variable %s not declared before assigning value\n", id);
+    exit(1);
+  }
+  lhs_type = var->type;
+
+  if (rhs->type == AST_OPERATOR) {
+    rhs_type = typecheck_operator(sts, rhs->l, rhs->r);
+  }
+  else if (rhs->type == AST_FCALL) {
+    char* f_id = rhs->l->value->value;
+    stEntry* f = lookup_all(sts, f_id);
+    if (!f) {
+      printf("Function %s not declared before use\n", f_id);
+      exit(1);
+    }
+    rhs_type = f->f_info->ret_type;
+  }
+  else if (rhs->type == AST_ID) {
+    stEntry* var = lookup_all(sts, rhs->value->value);
+    if (!var) {
+      printf("Variable %s not declared before use\n", rhs->value->value);
+      exit(1);
+    }
+    rhs_type = var->type;
+  } else {
+    rhs_type = rhs->value->type;
+  }
+
+  return matchType(lhs_type, rhs_type);
+}
+
 int typecheck_operator(symtabStack* sts, AST* lhs, AST* rhs) {
   int lt;
   int rt;
   if (lhs->type == AST_OPERATOR) lt = typecheck_operator(sts, lhs->l, lhs->r);
-  if (lhs->type == AST_FUNCTION) lt = funcRetType(lhs);
-  if (lhs->type == AST_ID) {
+  else if (lhs->type == AST_FCALL) {
+    char* id = lhs->l->value->value;
+    stEntry* f = lookup_all(sts, id);
+    if (!f) {
+      printf("Function %s not declared before use\n", id);
+      exit(1);
+    }
+    lt = f->f_info->ret_type;
+  }
+  else if (lhs->type == AST_ID) {
     stEntry* var = lookup_all(sts, lhs->value->value);
     if (!var) {
       printf("Variable %s not declared before use\n", lhs->value->value);
@@ -179,8 +246,17 @@ int typecheck_operator(symtabStack* sts, AST* lhs, AST* rhs) {
   else lt = lhs->value->type;
 
   if (rhs->type == AST_OPERATOR) rt = typecheck_operator(sts, rhs->l, rhs->r);
-  if (rhs->type == AST_FCALL) rt = funcRetType(rhs); // Lookup st for function ret
-  if (rhs->type == AST_ID) {
+  // if (rhs->type == AST_FCALL) rt = funcRetType(rhs); // Lookup st for function ret
+  else if (rhs->type == AST_FCALL) {
+    char* id = rhs->l->value->value;
+    stEntry* f = lookup_all(sts, id);
+    if (!f) {
+      printf("Function %s not declared before use\n", id);
+      exit(1);
+    }
+    rt = f->f_info->ret_type;
+  }
+  else if (rhs->type == AST_ID) {
     stEntry* var = lookup_all(sts, rhs->value->value);
     if (!var) {
       printf("Variable %s not declared before use\n", rhs->value->value);

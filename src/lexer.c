@@ -104,6 +104,7 @@ token *getNextToken(Lexer *lexer) {
         }
         tv = malStrncpy(lexer->src + begI, lexer->srcPos - begI);
         tokenType tt = isKeyword(lexer, tv);
+        if (tt == T_KW_TRUE || tt == T_KW_FALSE) tt = T_LIT_BOOL;
         // tt = (tt >= 0) ? tt : T_IDENTIFIER;
         return makeToken(tt, tv, cLocB);
       }

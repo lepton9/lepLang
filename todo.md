@@ -1,11 +1,11 @@
 DONE:
-- make function parameter be a normal Variable and not a different type Parameter
-- fix for hashtab expanding adding additional elements
-
-TODO:
-- function return type check
 - function call ret type
 - add func ret type to symboltable
+- assignment typecheck
+
+TODO:
+- function arguments type check
+- function returns the same type as defined
 - add { and } to ast to have blocks
     - when { enter new scope
     - when } exit scope
