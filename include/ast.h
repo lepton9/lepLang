@@ -6,7 +6,7 @@
 
 typedef struct AST_NODE {
   enum {
-    AST_PROGRAM,
+    AST_PROGRAM = 100,
     AST_MAIN,
     AST_STATEMENT,
     AST_VARIABLE,

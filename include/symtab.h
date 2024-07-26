@@ -2,24 +2,37 @@
 #define SYMTAB_H
 
 #include "../include/ast.h"
+#include "../include/hashtab.h"
+#include "../include/LList.h"
 
 typedef struct {
-  // char** name;
+  char* name;
   int type;
-  char** scope;
+  char* scope;
+  int declLine;
+  LList* usageLines;
+  size_t size;
+  int address;
   AST* node;
-
 } stEntry;
 
-typedef struct {
+typedef hashtab symtab;
 
-} symtab;
+// typedef struct {
+//   hashtab* table;
+//   char* scope;
+// } symtab;
 
 symtab* initSymbolTable();
+void freeSymbolTable(symtab* st);
+void free_stEntry(stEntry* entry);
 
+stEntry* st_insert(symtab* st, const char* key);
+stEntry* st_lookup(symtab* st, const char* identifier);
 
-void insert(symtab* table);
-void lookup(symtab* table, char** identifier);
-void hide(symtab* table, char** scope);
+// void hide(symtab* table, char** scope);
+//
+// void set(symtab* table); // Beginning of block
+// void reset(symtab* table); // End of block
 
 #endif

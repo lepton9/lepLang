@@ -199,17 +199,19 @@ AST* parse_func_params(parser* p) {
 }
 
 AST* parse_func_param(parser* p) {
-  AST* param = NULL;
-  token* t = p->token;
-  if (acceptType(p)) {
-    expect(p, T_COLON);
-    AST* type = initAST(AST_TYPE, t);
-    AST* id = parse_id(p);
-    param = initAST(AST_PARAMETER, NULL);
-    param->l = type;
-    param->r = id;
-  }
-  return param;
+  return (isType(p)) ? parse_var_decl(p) : NULL;
+
+  // AST* param = NULL;
+  // token* t = p->token;
+  // if (acceptType(p)) {
+  //   expect(p, T_COLON);
+  //   AST* type = initAST(AST_TYPE, t);
+  //   AST* id = parse_id(p);
+  //   param = initAST(AST_PARAMETER, NULL);
+  //   param->l = type;
+  //   param->r = id;
+  // }
+  // return param;
 }
 
 AST* parse_term(parser *p) {

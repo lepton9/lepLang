@@ -18,8 +18,12 @@ void free_item(ht_e* item) {
 }
 
 hashtab* init_hashtab() {
+  return init_hashtabn(INIT_SIZE);
+}
+
+hashtab* init_hashtabn(const size_t size) {
   hashtab* ht = malloc(sizeof(hashtab));
-  ht->size = INIT_SIZE;
+  ht->size = size;
   ht->n = 0;
   ht->items = calloc(ht->size, sizeof(ht_e*));
   return ht;
@@ -43,22 +47,23 @@ static uint64_t hash_key(const char* key) {
   return hash;
 }
 
-int key_index(const char* key, size_t size) {
+int key_index(const char* key, const size_t size) {
   return hash_key(key) % size;
 }
 
-static bool ht_set(ht_e** items, size_t size, const char* key, void* value) {
+static ht_e* ht_set(ht_e** items, const size_t size, size_t* n, const char* key, void* value) {
   int ind = key_index(key, size);
   while(items[ind] != NULL) {
     if (strcmp(key, items[ind]->key) == 0) {
       items[ind]->value = value;
-      return false;
+      return items[ind];
     }
     // Linear probing
     ind = (ind + 1) % size;
   }
   items[ind] = init_item(key, value);
-  return true;
+  (*n)++;
+  return items[ind];
 }
 
 static bool ht_expand(hashtab* ht) {
@@ -66,11 +71,12 @@ static bool ht_expand(hashtab* ht) {
   if (new_size < ht->size) return false;
   ht_e** new_items = calloc(new_size, sizeof(ht_e*));
   if (new_items == NULL) return false;
+  ht->n = 0;
 
   for (size_t i = 0; i < ht->size; i++) {
     ht_e* item = ht->items[i];
     if (item != NULL) {
-      ht_set(new_items, new_size, item->key, item->value);
+      ht_set(new_items, new_size, &ht->n, item->key, item->value);
     }
   }
   free(ht->items);
@@ -79,23 +85,28 @@ static bool ht_expand(hashtab* ht) {
   return true;
 }
 
-void ht_insert(hashtab* ht, const char* key, void* value) {
+ht_e* ht_insert(hashtab* ht, const char* key, void* value) {
   if (ht->n >= ht->size / 2) {
-    if (!ht_expand(ht)) return;
+    if (!ht_expand(ht)) return NULL;
   }
-  if (ht_set(ht->items, ht->size, key, value)) ht->n++;
+  return ht_set(ht->items, ht->size, &ht->n, key, value);
 }
 
-void* ht_get(hashtab* ht, const char* key) {
+ht_e* ht_lookup(hashtab* ht, const char* key) {
   int ind = key_index(key, ht->size);
   while(ht->items[ind] != NULL) {
     if (strcmp(key, ht->items[ind]->key) == 0) {
-      return ht->items[ind]->value;
+      return ht->items[ind];
     }
     ind++;
     if (ind >= ht->size) ind = 0;
   }
   return NULL;
+}
+
+void* ht_get(hashtab* ht, const char* key) {
+  ht_e* e = ht_lookup(ht, key);
+  return (e) ? e->value : NULL;
 }
 
 bool ht_delete(hashtab* ht, const char* key) {

@@ -22,9 +22,11 @@ ht_e* init_item(const char* key, void* value);
 void free_item(ht_e* item);
 
 hashtab* init_hashtab();
+hashtab* init_hashtabn(const size_t size);
 void free_hashtab(hashtab* ht);
 void* ht_get(hashtab* ht, const char* key);
-void ht_insert(hashtab* ht, const char* key, void* value);
+ht_e* ht_lookup(hashtab* ht, const char* key);
+ht_e* ht_insert(hashtab* ht, const char* key, void* value);
 bool ht_delete(hashtab* ht, const char* key);
 static uint64_t hash(const char* key);
 static bool ht_expand(hashtab* ht);

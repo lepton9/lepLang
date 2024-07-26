@@ -1,8 +1,20 @@
 DONE:
+- make function parameter be a normal Variable and not a different type Parameter
+- fix for hashtab expanding adding additional elements
 
 TODO:
+- function return type check
+- function call ret type
+- add func ret type to symboltable
+- add { and } to ast to have blocks
+    - when { enter new scope
+    - when } exit scope
+- check if variable has initialized value before use
+- tab not recognized as whitespace by lexer
+- type casting
 - tests for hashtab
 - better error printing
+    - error header to handle all errors across the compiling process
 - rest of the grammar parsing
 - semantic analysis
     - type checking
@@ -12,7 +24,6 @@ TODO:
         - Keep track of variable and function declarations and their attributes
     - other semantic rules
 - intermediate code generation
-
 
 
 
