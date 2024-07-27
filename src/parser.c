@@ -200,18 +200,6 @@ AST* parse_func_params(parser* p) {
 
 AST* parse_func_param(parser* p) {
   return (isType(p)) ? parse_var_decl(p) : NULL;
-
-  // AST* param = NULL;
-  // token* t = p->token;
-  // if (acceptType(p)) {
-  //   expect(p, T_COLON);
-  //   AST* type = initAST(AST_TYPE, t);
-  //   AST* id = parse_id(p);
-  //   param = initAST(AST_PARAMETER, NULL);
-  //   param->l = type;
-  //   param->r = id;
-  // }
-  // return param;
 }
 
 AST* parse_term(parser *p) {
@@ -265,7 +253,8 @@ AST* parse_assignment(parser* p) {
 
 AST* parse_fcall_args(parser* p) {
   AST* args = initAST(AST_FARGUMENTS, NULL);
-  args->l = parse_expr(p);
+  if (p->token->type == T_PAREN_R) args->l = NULL;
+  else args->l = parse_expr(p);
   AST* cur = args->l;
   while(accept(p, T_COMMA)) {
     AST* arg = parse_expr(p);

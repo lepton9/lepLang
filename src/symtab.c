@@ -43,3 +43,23 @@ stEntry* st_lookup(symtab* st, const char* identifier) {
   return e;
 }
 
+void print_symtab(FILE* out, const symtab* st) {
+  fprintf(out, "\n<-------------------->\n");
+  for (int i = 0; i < st->size; i++) {
+    if (st->items[i]) print_stEntry(out, st->items[i]->value);
+  }
+  fprintf(out, ">--------------------<\n");
+}
+
+void print_stEntry(FILE* out, const stEntry* e) {
+  fprintf(out, "%d:%s decl: %d", e->type, e->name, e->declLine);
+  if (e->f_info) {
+    fprintf(out, " ret: %d args: ( ", e->f_info->ret_type);
+    for (int i = 0; i < e->f_info->n_params; i++) {
+      fprintf(out, "%d ", e->f_info->param_types[i]);
+    }
+    fprintf(out, ")");
+  }
+  fprintf(out, "\n");
+}
+

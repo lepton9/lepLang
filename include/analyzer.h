@@ -31,10 +31,9 @@ void enter_scope(symtabStack* sts);
 void exit_scope(symtabStack* sts);
 
 bool matchType(const int a, const int b);
-int funcRetType(AST* f);
+int funcRetType(AST* f); // To be deleted
 TYPE convertType(const int type);
 
-void addVar(symtabStack* sts, const char* id);
 stEntry* newVariable(symtabStack* sts, const char* id, const TYPE type);
 
 stEntry* lookup_all(symtabStack* sts, const char* key);
@@ -42,6 +41,8 @@ stEntry* lookup_scope(symtab* st, const char* key);
 
 void checkAST(AST* root);
 void semanticAnalysis(symtabStack* sts, AST* ast);
+
+TYPE expr_type(symtabStack* sts, AST* expr);
 
 bool typecheck_fcall(symtabStack* sts, AST* fcall);
 bool typecheck_assignment(symtabStack* sts, AST* lhs, AST* rhs);

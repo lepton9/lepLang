@@ -53,6 +53,7 @@ token *getNextToken(Lexer *lexer) {
   *c = advance(lexer);
   switch (*c) {
     case ' ':
+    case 9: // Tab
       // token = makeToken(T_SPACE, c, cLocB);
       return NULL;
     case '\n':

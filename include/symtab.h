@@ -4,6 +4,7 @@
 #include "../include/ast.h"
 #include "../include/hashtab.h"
 #include "../include/LList.h"
+#include <stdio.h>
 
 typedef struct {
   int ret_type;
@@ -36,6 +37,9 @@ void free_stEntry(stEntry* entry);
 
 stEntry* st_insert(symtab* st, const char* key);
 stEntry* st_lookup(symtab* st, const char* identifier);
+
+void print_symtab(FILE* out, const symtab* st);
+void print_stEntry(FILE* out, const stEntry* e);
 
 // void hide(symtab* table, char** scope);
 //

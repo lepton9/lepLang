@@ -1,16 +1,14 @@
 DONE:
-- function call ret type
-- add func ret type to symboltable
-- assignment typecheck
+- function arguments type check
+- tab not recognized as whitespace by lexer
 
 TODO:
-- function arguments type check
 - function returns the same type as defined
+    - scope name and number in symtab
 - add { and } to ast to have blocks
     - when { enter new scope
     - when } exit scope
 - check if variable has initialized value before use
-- tab not recognized as whitespace by lexer
 - type casting
 - tests for hashtab
 - better error printing
