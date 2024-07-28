@@ -8,6 +8,7 @@ typedef struct AST_NODE {
   enum {
     AST_PROGRAM = 100,
     AST_MAIN,
+    AST_BLOCK,
     AST_STATEMENT,
     AST_VARIABLE,
     AST_TYPE,

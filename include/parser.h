@@ -31,6 +31,8 @@ token* peekToken(parser* p);
 
 AST* parse_program(parser* p);
 
+AST* parse_block(parser* p);
+
 AST* parse_func_def(parser* p);
 AST* parse_func_header(parser* p);
 AST* parse_func_body(parser* p);

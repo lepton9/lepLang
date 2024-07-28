@@ -6,13 +6,17 @@ str:text = "abc";
 
 f:funcname(int:first, int:second) -> int {
   char:c = 'a';
-  int:a = 2;
+  {
+    int:a = 2;
+    float:flt;
+  }
+  int:a = 2 + first;
   float:flt;
   ret a;
 }
 
-f:func() -> float {
-  ret 0.0;
+f:func() -> void {
+  ret;
 }
 
 f:main() -> int {
@@ -20,9 +24,7 @@ f:main() -> int {
   funcname(1,2);
   int:r = funcname(1, 2 + funcname(1 - 1, 2)) + 2;
   str:s = "string";
-  ret true;
+  ret 0;
 }
-
-bool:bl = true;
 
 

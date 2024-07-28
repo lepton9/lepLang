@@ -1,13 +1,11 @@
 DONE:
-- function arguments type check
-- tab not recognized as whitespace by lexer
-
-TODO:
 - function returns the same type as defined
-    - scope name and number in symtab
+- check that function returns if not void
 - add { and } to ast to have blocks
     - when { enter new scope
     - when } exit scope
+
+TODO:
 - check if variable has initialized value before use
 - type casting
 - tests for hashtab

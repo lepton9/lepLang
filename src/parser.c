@@ -179,10 +179,8 @@ AST* parse_func_header(parser* p) {
 }
 
 AST* parse_func_body(parser* p) {
-  expect(p, T_BRACE_L);
-  AST* body = initAST(AST_FBODY, NULL);
-  body->l = parse_statements(p);
-  expect(p, T_BRACE_R);
+  AST* body = parse_block(p);
+  body->type = AST_FBODY;
   return body;
 }
 
@@ -276,6 +274,14 @@ AST* parse_fcall(parser* p) {
   return func_call;
 }
 
+AST* parse_block(parser* p) {
+  expect(p, T_BRACE_L);
+  AST* block = initAST(AST_BLOCK, NULL);
+  block->l = parse_statements(p);
+  expect(p, T_BRACE_R);
+  return block;
+}
+
 AST* parse_statements(parser *p) {
   // AST *statement = parse_statement(p);
   AST *statements = initAST(AST_STATEMENT, NULL);
@@ -291,12 +297,17 @@ AST* parse_statements(parser *p) {
 AST* parse_statement(parser *p) {
   AST *statement = NULL;
   token* t = p->token;
+  while (accept(p, T_SEMICOLON));
   if (isType(p)) {
     statement = parse_var_decl(p);
   } else if (p->token->type == T_IDENTIFIER && peekToken(p)->type == T_PAREN_L) {
     statement = parse_fcall(p);
   } else if (p->token->type == T_IDENTIFIER) {
     statement = parse_assignment(p);
+  } else if (p->token->type == T_BRACE_L) {
+    statement = parse_block(p);
+    accept(p, T_SEMICOLON);
+    return statement;
   } else if (p->token->type == T_KW_RET) {
     statement = parse_return(p);
   } else {
@@ -310,7 +321,9 @@ AST* parse_statement(parser *p) {
 AST* parse_return(parser *p) {
   token* t = p->token;
   expect(p, T_KW_RET);
-  AST* expr_node = parse_expr(p);
+  AST* expr_node;
+  if (p->token->type == T_SEMICOLON) expr_node = NULL;
+  else expr_node = parse_expr(p);
   AST* ret_node = initAST(AST_RET, t);
   ret_node->l = expr_node;
   return ret_node;

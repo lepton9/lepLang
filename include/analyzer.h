@@ -16,11 +16,16 @@ typedef enum {
 } TYPE;
 
 typedef struct {
-  int cur_scope;
-  // stack* s;
-  LList* s;
-  // AST* root;
+  char* func_name;
+  TYPE ret_type;
+  bool returned;
+  int ret_scope;
+} context;
 
+typedef struct {
+  int cur_scope;
+  LList* s;
+  LList* contexts;
 } symtabStack;
 
 symtabStack* init_st_stack();

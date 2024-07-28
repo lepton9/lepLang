@@ -4,12 +4,10 @@
 
 symtabStack* init_st_stack() {
   symtabStack* sts = malloc(sizeof(symtabStack));
-  // sts->root = root;
   sts->cur_scope = 0;
-  // sts->s = init_stack();
   sts->s = create_list();
+  sts->contexts = create_list();
   symtab* global_st = initSymbolTable();
-  // push(sts->s, global_st);Q
   add_to_begin(sts->s, global_st);
   return sts;
 }
@@ -20,6 +18,7 @@ void free_st_stack(symtabStack* sts) {
     freeSymbolTable(st);
   }
   free(sts->s);
+  free(sts->contexts);
   free(sts);
 }
 
@@ -90,7 +89,29 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
       enter_scope(sts);
       {
         semanticAnalysis(sts, header);
+
+        context* c = malloc(sizeof(context));
+        c->ret_type = f->f_info->ret_type;
+        c->func_name = f->name;
+        c->returned = false;
+        c->ret_scope = -1;
+        add_to_begin(sts->contexts, c);
+
         semanticAnalysis(sts, body);
+
+        if (f->f_info->ret_type != VOID) {
+          if (!c->returned) {
+            printf("Non void function %s not returning a value\n", f->name);
+            exit(1);
+          }
+          if (c->ret_scope != sts->cur_scope) {
+            printf("Function %s not returning from all code paths\n", f->name);
+            exit(1);
+          }
+        }
+
+        pop_front(sts->contexts);
+        free(c);
         // printf("Function scope variables %d\n", (int)currentScope(sts)->n);
         print_symtab(stdout, currentScope(sts));
       }
@@ -99,7 +120,24 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
       return;
     }
     case AST_RET: {
-      TYPE ret_type = expr_type(sts, ast->l);
+      TYPE ret_type = (ast->l) ? expr_type(sts, ast->l) : VOID;
+      TYPE func_ret_type;
+      if (!is_empty(sts->contexts)) {
+        context* c = sts->contexts->head->data;
+        func_ret_type = c->ret_type;
+        c->returned = true;
+        if (c->ret_scope < 0 || c->ret_scope > sts->cur_scope) {
+          c->ret_scope = sts->cur_scope;
+        }
+        
+      } else {
+        printf("Return statement outside of a function\n");
+        exit(1);
+      }
+      if (!matchType(ret_type, func_ret_type)) {
+        printf("Wrong function return type: %d != %d\n", ret_type, func_ret_type);
+        exit(1);
+      }
       // printf("ret type: %d\n", ret_type);
       // return;
       break;
@@ -107,6 +145,14 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
     case AST_FCALL: {
       typecheck_fcall(sts, ast);
       break;
+    }
+    case AST_BLOCK: {
+      enter_scope(sts);
+      semanticAnalysis(sts, ast->l);
+      print_symtab(stdout, currentScope(sts));
+      exit_scope(sts);
+      semanticAnalysis(sts, ast->next);
+      return;
     }
     case AST_VARIABLE: {
       AST* id = ast->r;
@@ -262,6 +308,7 @@ void checkAST(AST* root) {
 
   semanticAnalysis(st_stack, root);
 
+  printf("\nGlobal scope:\n");
   print_symtab(stdout, st_stack->s->head->data);
 
   // printf("Global variables %d\n", (int)currentScope(st_stack)->n);
