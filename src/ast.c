@@ -4,8 +4,8 @@
 AST *initAST(int type, token *t) {
   AST *ast = malloc(sizeof(AST));
   ast->type = type;
-  // ast->value = malloc(sizeof(token));
-  ast->value = t;
+  // ast->tok = malloc(sizeof(token));
+  ast->tok = t;
   ast->l = NULL;
   ast->r = NULL;
   ast->next = NULL;
@@ -69,19 +69,19 @@ void printAST(AST *node, int indent) {
       printf("Expression\n");
       break;
     case AST_TYPE:
-      printf("Type: %s\n", (char*)node->value->value);
+      printf("Type: %s\n", (char*)node->tok->value);
       break;
     case AST_ID:
-      printf("Identifier: %s\n", node->value->value);
+      printf("Identifier: %s\n", node->tok->value);
       break;
     case AST_MAIN:
-      printf("MAIN: %s\n", node->value->value);
+      printf("MAIN: %s\n", node->tok->value);
       break;
     case AST_OPERATOR:
-      printf("Operator: %s\n", node->value->value);
+      printf("Operator: %s\n", node->tok->value);
       break;
     case AST_VALUE:
-      printf("Value: %s\n", node->value->value);
+      printf("Value: %s\n", node->tok->value);
       break;
     default:
       printf("Undefined\n");
@@ -100,8 +100,8 @@ void print_ast(AST* node, int indent) {
   for (int i = 0; i < indent; i++)
     printf("  ");
 
-  if (node->value) {
-    printf("%s\n", node->value->value);
+  if (node->tok) {
+    printf("%s\n", node->tok->value);
   } else {
     printf("U\n");
   }

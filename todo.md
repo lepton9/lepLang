@@ -1,12 +1,8 @@
 DONE:
-- function returns the same type as defined
-- check that function returns if not void
-- add { and } to ast to have blocks
-    - when { enter new scope
-    - when } exit scope
+- check if variable has initialized value before use
 
 TODO:
-- check if variable has initialized value before use
+- memory address of the value
 - type casting
 - tests for hashtab
 - better error printing

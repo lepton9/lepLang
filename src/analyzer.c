@@ -1,6 +1,7 @@
 #include "../include/analyzer.h"
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
 symtabStack* init_st_stack() {
   symtabStack* sts = malloc(sizeof(symtabStack));
@@ -58,6 +59,7 @@ symtab* currentScope(symtabStack* sts) {
 stEntry* newVariable(symtabStack* sts, const char* id, const TYPE type) {
   stEntry* var = st_insert(currentScope(sts), id);
   var->type = type;
+  var->value = NULL;
   return var;
 }
 
@@ -69,7 +71,7 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
       AST* header = ast->l;
       AST* body = ast->r;
       AST* param = header->l->next->l;
-      token* name = header->l->value;
+      token* name = header->l->tok;
       if (lookup_all(sts, name->value)) {
         printf("Function %s already defined\n", name->value);
         exit(1);
@@ -77,19 +79,19 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
       stEntry* f = newVariable(sts, name->value, F);
       f->declLine = name->loc.line;
       f->f_info = malloc(sizeof(func_info));
-      f->f_info->ret_type = convertType(ast->l->l->next->next->value->type);
+      f->f_info->ret_type = convertType(ast->l->l->next->next->tok->type);
       f->f_info->n_params = 0;
       while (param) {
         f->f_info->param_types = realloc(f->f_info->param_types, sizeof(int) * f->f_info->n_params + 1);
-        f->f_info->param_types[f->f_info->n_params] = convertType(param->l->value->type);
+        f->f_info->param_names = realloc(f->f_info->param_names, sizeof(char*) * f->f_info->n_params + 1);
+        f->f_info->param_types[f->f_info->n_params] = convertType(param->l->tok->type);
+        f->f_info->param_names[f->f_info->n_params] = param->r->tok->value;
         assert(param->type == AST_VARIABLE);
         f->f_info->n_params++;
         param = param->next;
       }
       enter_scope(sts);
       {
-        semanticAnalysis(sts, header);
-
         context* c = malloc(sizeof(context));
         c->ret_type = f->f_info->ret_type;
         c->func_name = f->name;
@@ -97,6 +99,7 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
         c->ret_scope = -1;
         add_to_begin(sts->contexts, c);
 
+        semanticAnalysis(sts, header);
         semanticAnalysis(sts, body);
 
         if (f->f_info->ret_type != VOID) {
@@ -157,12 +160,22 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
     case AST_VARIABLE: {
       AST* id = ast->r;
       if (id->type == AST_ASSIGNMENT) id = ast->r->l;
-      if (lookup_all(sts, id->value->value)) {
-        printf("Variable %s already defined\n", id->value->value);
+      if (lookup_all(sts, id->tok->value)) {
+        printf("Variable %s already defined\n", id->tok->value);
         exit(1);
       }
-      stEntry* var = newVariable(sts, id->value->value, convertType(ast->l->value->type));
-      var->declLine = id->value->loc.line;
+      stEntry* var = newVariable(sts, id->tok->value, convertType(ast->l->tok->type));
+      var->declLine = id->tok->loc.line;
+      if (sts->contexts->head) {
+        context* c = sts->contexts->head->data;
+        stEntry* f = lookup_all(sts, c->func_name);
+        for (int i = 0; i < f->f_info->n_params; i++) {
+          if (strcmp(f->f_info->param_names[i], var->name) == 0) {
+            var->value = ast;
+            break;
+          }
+        }
+      }
       break;
     }
     case AST_ASSIGNMENT: {
@@ -184,7 +197,7 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
 
 // To be deleted
 int funcRetType(AST* f) {
-  return f->l->l->next->next->value->type;
+  return f->l->l->next->next->tok->type;
 }
 
 TYPE convertType(const int type) {
@@ -232,7 +245,7 @@ TYPE expr_type(symtabStack* sts, AST* expr) {
   }
   else if (expr->type == AST_FCALL) {
     typecheck_fcall(sts, expr);
-    char* f_id = expr->l->value->value;
+    char* f_id = expr->l->tok->value;
     stEntry* f = lookup_all(sts, f_id);
     type = f->f_info->ret_type;
     if (matchType(type, VOID)) {
@@ -241,23 +254,27 @@ TYPE expr_type(symtabStack* sts, AST* expr) {
     }
   }
   else if (expr->type == AST_ID) {
-    stEntry* var = lookup_all(sts, expr->value->value);
+    stEntry* var = lookup_all(sts, expr->tok->value);
     if (!var) {
-      printf("Variable %s not declared before use\n", expr->value->value);
+      printf("Variable %s not declared before use\n", expr->tok->value);
+      exit(1);
+    }
+    if (!var->value) {
+      printf("Variable %s has no assigned value\n", expr->tok->value);
       exit(1);
     }
     type = var->type;
   } else {
-    type = expr->value->type;
+    type = expr->tok->type;
   }
   return convertType(type);
 }
 
 bool typecheck_fcall(symtabStack* sts, AST* fcall) {
   AST* arg = fcall->r->l;
-  stEntry* f = lookup_all(sts, fcall->l->value->value);
+  stEntry* f = lookup_all(sts, fcall->l->tok->value);
   if (!f) {
-    printf("Function %s not declared before use\n", fcall->l->value->value);
+    printf("Function %s not declared before use\n", fcall->l->tok->value);
     exit(1);
   }
   int i = 0;
@@ -283,12 +300,13 @@ bool typecheck_fcall(symtabStack* sts, AST* fcall) {
 
 bool typecheck_assignment(symtabStack* sts, AST* lhs, AST* rhs) {
   int lhs_type, rhs_type;
-  char* id = lhs->value->value;
+  char* id = lhs->tok->value;
   stEntry* var = lookup_all(sts, id);
   if (!var) {
     printf("Variable %s not declared before assigning value\n", id);
     exit(1);
   }
+  var->value = rhs;
   lhs_type = var->type;
   rhs_type = expr_type(sts, rhs);
 
@@ -308,6 +326,7 @@ void checkAST(AST* root) {
 
   semanticAnalysis(st_stack, root);
 
+  assert(st_stack->cur_scope == 0);
   printf("\nGlobal scope:\n");
   print_symtab(stdout, st_stack->s->head->data);
 

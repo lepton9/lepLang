@@ -28,7 +28,7 @@ typedef struct AST_NODE {
     AST_RET,
   } type;
 
-  token* value;
+  token* tok;
 
   struct AST_NODE* l;
   struct AST_NODE* r;

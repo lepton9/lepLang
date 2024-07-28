@@ -10,6 +10,7 @@ typedef struct {
   int ret_type;
   size_t n_params;
   int* param_types;
+  char** param_names;
 } func_info;
 
 typedef struct {
@@ -21,7 +22,7 @@ typedef struct {
   size_t size;
   int address;
   func_info* f_info;
-  AST* node;
+  AST* value;
 } stEntry;
 
 typedef hashtab symtab;

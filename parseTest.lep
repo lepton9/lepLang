@@ -7,10 +7,10 @@ str:text = "abc";
 f:funcname(int:first, int:second) -> int {
   char:c = 'a';
   {
-    int:a = 2;
+    int:a = 2 + first - second;
     float:flt;
   }
-  int:a = 2 + first;
+  int:a = 2;
   float:flt;
   ret a;
 }
