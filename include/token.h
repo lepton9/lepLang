@@ -56,12 +56,12 @@ typedef enum {
 typedef struct {
   int line;
   int column;
-} CLoc;
+} cLoc;
 
 typedef struct {
   tokenType type;
   char *value;
-  CLoc loc;
+  cLoc loc;
 } token;
 
 // Maybe better
@@ -71,7 +71,7 @@ typedef struct {
 //   CLoc loc; // start of the token
 // } Token;
 
-token *makeToken(const tokenType type, const char *value, const CLoc codeLoc);
+token *makeToken(const tokenType type, const char *value, const cLoc codeLoc);
 const char* tokenTypeToStr(tokenType type);
 void printToken(token* token);
 

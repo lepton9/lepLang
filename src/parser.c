@@ -1,4 +1,5 @@
 #include "../include/parser.h"
+#include "../include/errorlep.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -34,7 +35,7 @@ int expect(parser *p, tokenType type) {
   if (accept(p, type)) {
     return 1;
   }
-  errorSyntax(p, "Unexpected token", tokenTypeToStr(type));
+  error_parse(p, "Unexpected token", tokenTypeToStr(type));
   return 0;
 }
 
@@ -122,7 +123,7 @@ AST* parse_program(parser* p) {
       d = parse_var_decl(p);
       expect(p, T_SEMICOLON);
     } else {
-      errorSyntax(p, "Unexpected definition", tokenTypeToStr(p->token->type));
+      error_parse(p, "Unexpected definition", tokenTypeToStr(p->token->type));
     }
     if (d) {
       cur->next = d;
@@ -213,7 +214,7 @@ AST* parse_term(parser *p) {
     term = parse_expr(p);
     expect(p, T_PAREN_R);
   } else {
-    errorSyntax(p, "Unknown term", NULL);
+    error_parse(p, "Unknown term", NULL);
   }
   return term;
 }
@@ -311,7 +312,7 @@ AST* parse_statement(parser *p) {
   } else if (p->token->type == T_KW_RET) {
     statement = parse_return(p);
   } else {
-    errorSyntax(p, "Unknown statement", NULL);
+    error_parse(p, "Unknown statement", NULL);
     exit(1);
   }
   expect(p, T_SEMICOLON);
@@ -351,15 +352,15 @@ int digits(int n)
   return count;
 }
 
-void errorSyntax(parser* p, const char *msg, const char* expected) {
-  if (expected) {
-    printf("[Parser] %s : %s != %s, at L%-2d C%d\n", msg, tokenTypeToStr(p->token->type), expected, p->token->loc.line, p->token->loc.column);
-  } else {
-    printf("[Parser] %s : %s, at L%-2d C%d\n", msg, tokenTypeToStr(p->token->type), p->token->loc.line, p->token->loc.column);
-  }
-  printf("%d: %s\n", p->token->loc.line, getLine(p->lexer, p->token->loc.line));
-  printf("%*c^\n", p->token->loc.column + digits(p->token->loc.line) + 1, ' ');
-  exit(1);
-}
+// void errorSyntax(parser* p, const char *msg, const char* expected) {
+//   if (expected) {
+//     printf("[Syntax error] %s : %s != %s, at L%-2d C%d\n", msg, tokenTypeToStr(p->token->type), expected, p->token->loc.line, p->token->loc.column);
+//   } else {
+//     printf("[Syntax error] %s : %s, at L%-2d C%d\n", msg, tokenTypeToStr(p->token->type), p->token->loc.line, p->token->loc.column);
+//   }
+//   printf("%d: %s\n", p->token->loc.line, getLine(p->lexer, p->token->loc.line));
+//   printf("%*c^\n", p->token->loc.column + digits(p->token->loc.line) + 1, ' ');
+//   exit(1);
+// }
 
 

@@ -1,4 +1,5 @@
 #include "../include/analyzer.h"
+#include "../include/errorlep.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -73,8 +74,7 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
       AST* param = header->l->next->l;
       token* name = header->l->tok;
       if (lookup_all(sts, name->value)) {
-        printf("Function %s already defined\n", name->value);
-        exit(1);
+        error_redef(name->value, F, name->loc);
       }
       stEntry* f = newVariable(sts, name->value, F);
       f->declLine = name->loc.line;
@@ -104,12 +104,10 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
 
         if (f->f_info->ret_type != VOID) {
           if (!c->returned) {
-            printf("Non void function %s not returning a value\n", f->name);
-            exit(1);
+            error_ret("not returning a value", f->name);
           }
           if (c->ret_scope != sts->cur_scope) {
-            printf("Function %s not returning from all code paths\n", f->name);
-            exit(1);
+            error_ret("not returning from all code paths", f->name);
           }
         }
 
@@ -134,15 +132,11 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
         }
         
       } else {
-        printf("Return statement outside of a function\n");
-        exit(1);
+        error_semantic("Return statement outside of a function\n", ast->tok->loc);
       }
       if (!matchType(ret_type, func_ret_type)) {
-        printf("Wrong function return type: %d != %d\n", ret_type, func_ret_type);
-        exit(1);
+        error_type("Wrong function return type", ast->tok->loc, ret_type, func_ret_type);
       }
-      // printf("ret type: %d\n", ret_type);
-      // return;
       break;
     }
     case AST_FCALL: {
@@ -161,8 +155,7 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
       AST* id = ast->r;
       if (id->type == AST_ASSIGNMENT) id = ast->r->l;
       if (lookup_all(sts, id->tok->value)) {
-        printf("Variable %s already defined\n", id->tok->value);
-        exit(1);
+        error_redef(id->tok->value, convertType(ast->l->tok->type), id->tok->loc);
       }
       stEntry* var = newVariable(sts, id->tok->value, convertType(ast->l->tok->type));
       var->declLine = id->tok->loc.line;
@@ -179,11 +172,7 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
       break;
     }
     case AST_ASSIGNMENT: {
-      bool valid = typecheck_assignment(sts, ast->l, ast->r);
-      if (!valid) {
-        printf("Assignment not valid\n");
-        exit(1);
-      }
+      typecheck_assignment(sts, ast->l, ast->r);
       semanticAnalysis(sts, ast->next);
       return;
     }
@@ -199,6 +188,20 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
 int funcRetType(AST* f) {
   return f->l->l->next->next->tok->type;
 }
+
+char* typeToStr(const TYPE type) {
+  switch (type) {
+    case INT: return strdup("int");
+    case FLOAT: return strdup("float");
+    case CHAR: return strdup("char");
+    case STR: return strdup("str");
+    case BOOL: return strdup("bool");
+    case F: return strdup("f");
+    case VOID: return strdup("void");
+  }
+  return NULL;
+}
+
 
 TYPE convertType(const int type) {
   switch (type) {
@@ -217,7 +220,7 @@ TYPE convertType(const int type) {
     case T_KW_STR:
     case T_LIT_STR:
     case STR:
-      return CHAR;
+      return STR;
     case T_KW_BOOL:
     case T_LIT_BOOL:
     case BOOL:
@@ -249,19 +252,16 @@ TYPE expr_type(symtabStack* sts, AST* expr) {
     stEntry* f = lookup_all(sts, f_id);
     type = f->f_info->ret_type;
     if (matchType(type, VOID)) {
-      printf("Function returning void in expression\n");
-      exit(1);
+      error_semantic("Function with ret type 'void' called in an expression", expr->l->tok->loc);
     }
   }
   else if (expr->type == AST_ID) {
     stEntry* var = lookup_all(sts, expr->tok->value);
     if (!var) {
-      printf("Variable %s not declared before use\n", expr->tok->value);
-      exit(1);
+      error_nodecl("Access", expr->tok->value, expr->tok->loc);
     }
     if (!var->value) {
-      printf("Variable %s has no assigned value\n", expr->tok->value);
-      exit(1);
+      error_value(var->name, var->type, expr->tok->loc);
     }
     type = var->type;
   } else {
@@ -274,25 +274,22 @@ bool typecheck_fcall(symtabStack* sts, AST* fcall) {
   AST* arg = fcall->r->l;
   stEntry* f = lookup_all(sts, fcall->l->tok->value);
   if (!f) {
-    printf("Function %s not declared before use\n", fcall->l->tok->value);
-    exit(1);
+    error_fnotfound(fcall->l->tok->value, fcall->l->tok->loc);
   }
   int i = 0;
   while(arg && i < f->f_info->n_params) {
-    if (!matchType(expr_type(sts, arg), f->f_info->param_types[i])) {
-      printf("Function parameter is the wrong type\n");
-      exit(1);
+    TYPE type = expr_type(sts, arg);
+    if (!matchType(type, f->f_info->param_types[i])) {
+      error_type("Wrong function argument type", arg->tok->loc, type, f->f_info->param_types[i]);
     }
     i++;
     arg = arg->next;
   }
   if (arg != NULL) {
-    printf("Too many arguments given to fcall\n");
-    exit(1);
+    error_semantic("Too many arguments given to fcall", arg->tok->loc);
   }
   else if (i < f->f_info->n_params) {
-    printf("Too few arguments given to fcall\n");
-    exit(1);
+    error_semantic("Too few arguments given to fcall", fcall->l->tok->loc);
   }
 
   return true;
@@ -303,14 +300,16 @@ bool typecheck_assignment(symtabStack* sts, AST* lhs, AST* rhs) {
   char* id = lhs->tok->value;
   stEntry* var = lookup_all(sts, id);
   if (!var) {
-    printf("Variable %s not declared before assigning value\n", id);
-    exit(1);
+    error_nodecl("Assignment", id, lhs->tok->loc);
   }
   var->value = rhs;
   lhs_type = var->type;
   rhs_type = expr_type(sts, rhs);
 
-  return matchType(lhs_type, rhs_type);
+  if (!matchType(lhs_type, rhs_type)) {
+    error_type("Trying to assign a value of the wrong type", lhs->tok->loc, rhs_type, lhs_type);
+  }
+  return true;
 }
 
 int typecheck_operator(symtabStack* sts, AST* lhs, AST* rhs) {

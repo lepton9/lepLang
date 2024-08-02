@@ -26,8 +26,9 @@ int acceptType(parser* p);
 int accept(parser *p, tokenType type);
 int expect(parser *p, tokenType type);
 token *nextToken(parser *p);
-void errorSyntax(parser* p, const char *msg, const char* expected);
+// void errorSyntax(parser* p, const char *msg, const char* expected);
 token* peekToken(parser* p);
+int digits(int n);
 
 AST* parse_program(parser* p);
 

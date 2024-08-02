@@ -1,12 +1,10 @@
 DONE:
-- check if variable has initialized value before use
+- better error printing
 
 TODO:
 - memory address of the value
 - type casting
 - tests for hashtab
-- better error printing
-    - error header to handle all errors across the compiling process
 - rest of the grammar parsing
 - semantic analysis
     - type checking

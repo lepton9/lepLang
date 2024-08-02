@@ -38,6 +38,7 @@ void exit_scope(symtabStack* sts);
 bool matchType(const int a, const int b);
 int funcRetType(AST* f); // To be deleted
 TYPE convertType(const int type);
+char* typeToStr(const TYPE type);
 
 stEntry* newVariable(symtabStack* sts, const char* id, const TYPE type);
 

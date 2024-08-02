@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-token *makeToken(const tokenType type, const char *value, const CLoc codeLoc) {
+token *makeToken(const tokenType type, const char *value, const cLoc codeLoc) {
   token *tok = malloc(sizeof(token));
   *tok = (token){type, (char*)value, codeLoc};
   return tok;

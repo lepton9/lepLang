@@ -46,7 +46,7 @@ void comment(Lexer* lexer) {
 
 token *getNextToken(Lexer *lexer) {
   int begI = lexer->srcPos;
-  CLoc cLocB = lexer->codeLoc;
+  cLoc cLocB = lexer->codeLoc;
   char* c = malloc(sizeof(char) + 1);
   char* tv;
   c[1] = '\0',
@@ -159,7 +159,7 @@ char* malStrncpy(const char *s, const size_t n) {
   return d;
 }
 
-token* makeTokenN(Lexer* lexer, const tokenType type, const int beg, const CLoc cl) {
+token* makeTokenN(Lexer* lexer, const tokenType type, const int beg, const cLoc cl) {
   char* tval = malStrncpy(lexer->src + beg, lexer->srcPos - beg);
   return makeToken(type, tval, cl);
 }
@@ -217,28 +217,27 @@ void nextLine(Lexer *lexer) {
   lexer->codeLoc.column = 1;
 }
 
-
-char* getLine(Lexer* lexer, const int n) {
+char* getLine(const char* src, const size_t srcLen, const int ln) {
   int startI = 0;
   int endI = -1;
   int curLine = 1;
   char* line;
-  for (int i = 0; i < lexer->srcLen; i++) {
-    if (curLine == n) {
+  for (int i = 0; i < srcLen; i++) {
+    if (curLine == ln) {
       startI = i;
-      for (int ie = i; ie < lexer->srcLen; ie++) {
-        if (lexer->src[ie] == '\n') {
+      for (int ie = i; ie < srcLen; ie++) {
+        if (src[ie] == '\n') {
           endI = ie - 1;
           break;
         }
       }
       break;
     }
-    if (lexer->src[i] == '\n') curLine++;
+    if (src[i] == '\n') curLine++;
   }
   int len = endI - startI + 1;
   line = malloc(len + 1);
-  memcpy(line, lexer->src + startI, len);
+  memcpy(line, src + startI, len);
   return line;
 }
 

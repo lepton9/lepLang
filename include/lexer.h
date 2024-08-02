@@ -12,7 +12,7 @@ typedef struct {
   char* msg;
   int beg;
   int len;
-  CLoc codeLoc;
+  cLoc codeLoc;
 } lexError;
 
 typedef struct {
@@ -21,7 +21,7 @@ typedef struct {
   char *src;
   int srcLen;
   int srcPos;
-  CLoc codeLoc;
+  cLoc codeLoc;
 } Lexer;
 
 Lexer *initLexer();
@@ -37,7 +37,7 @@ char advance(Lexer *lexer);
 void nextLine(Lexer *lexer);
 tokenType isKeyword(Lexer *lexer, const char *value);
 
-token* makeTokenN(Lexer *lexer, const tokenType type, const int beg, const CLoc cl);
+token* makeTokenN(Lexer *lexer, const tokenType type, const int beg, const cLoc cl);
 lexError* lexerError(Lexer *lexer, const char* msg, const int beg, const int len);
 void addSynError(Lexer *lexer, lexError * err);
 
@@ -47,6 +47,6 @@ void printError(Lexer *lexer, lexError *err);
 
 char* malStrncpy(const char *s, const size_t n);
 
-char* getLine(Lexer* lexer, const int line);
+char* getLine(const char* src, const size_t len, const int line);
 
 #endif
