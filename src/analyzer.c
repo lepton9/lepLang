@@ -7,6 +7,7 @@
 symtabStack* init_st_stack() {
   symtabStack* sts = malloc(sizeof(symtabStack));
   sts->cur_scope = 0;
+  sts->memOffset = 0;
   sts->s = create_list();
   sts->contexts = create_list();
   symtab* global_st = initSymbolTable();
@@ -57,10 +58,40 @@ symtab* currentScope(symtabStack* sts) {
   return sts->s->head->data;
 }
 
+int sizeOfType(const TYPE type) {
+  switch (type) {
+    case INT:
+      return sizeof(int);
+    case FLOAT:
+      return sizeof(float);
+    case CHAR:
+      return sizeof(char);
+    case STR:
+      return sizeof(char*);
+    case BOOL:
+      return sizeof(bool);
+    case F:
+      return 0;
+    case VOID:
+      return sizeof(void);
+  }
+  return 0;
+}
+
+bool allocMem(symtabStack* sts, stEntry* e, const int size) {
+  if (sts->memOffset + size > MAX_MEM) return false;
+  e->size = size;
+  e->address = sts->memOffset;
+  sts->memOffset += size;
+  return true;
+}
+
 stEntry* newVariable(symtabStack* sts, const char* id, const TYPE type) {
   stEntry* var = st_insert(currentScope(sts), id);
   var->type = type;
   var->value = NULL;
+  var->scope = sts->cur_scope;
+  allocMem(sts, var, sizeOfType(var->type));
   return var;
 }
 

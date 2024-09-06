@@ -6,6 +6,8 @@
 #include "../include/LList.h"
 #include <stdio.h>
 
+#define MAX_MEM 10000
+
 typedef struct {
   int ret_type;
   size_t n_params;
@@ -16,11 +18,12 @@ typedef struct {
 typedef struct {
   char* name;
   int type;
-  char* scope;
+  int scope;
   int declLine;
   LList* usageLines;
   size_t size;
   int address;
+  int slot; // Stack slot
   func_info* f_info;
   AST* value;
 } stEntry;

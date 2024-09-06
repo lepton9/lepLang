@@ -23,9 +23,10 @@ typedef struct {
 } context;
 
 typedef struct {
-  int cur_scope;
   LList* s;
   LList* contexts;
+  int cur_scope;
+  int memOffset;
 } symtabStack;
 
 symtabStack* init_st_stack();
@@ -40,6 +41,8 @@ int funcRetType(AST* f); // To be deleted
 TYPE convertType(const int type);
 char* typeToStr(const TYPE type);
 
+int sizeOfType(const TYPE type);
+bool allocMem(symtabStack* sts, stEntry* e, const int size);
 stEntry* newVariable(symtabStack* sts, const char* id, const TYPE type);
 
 stEntry* lookup_all(symtabStack* sts, const char* key);
