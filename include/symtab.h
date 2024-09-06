@@ -8,6 +8,16 @@
 
 #define MAX_MEM 10000
 
+typedef enum {
+  INT = 200,
+  FLOAT,
+  CHAR,
+  STR,
+  BOOL,
+  F,
+  VOID
+} TYPE;
+
 typedef struct {
   int ret_type;
   size_t n_params;
@@ -30,10 +40,15 @@ typedef struct {
 
 typedef hashtab symtab;
 
-// typedef struct {
-//   hashtab* table;
-//   char* scope;
-// } symtab;
+typedef struct {
+  LList* s;
+  LList* contexts;
+  int cur_scope;
+  int memOffset;
+} symtabStack;
+
+symtabStack* init_st_stack();
+void free_st_stack(symtabStack* sts);
 
 symtab* initSymbolTable();
 void freeSymbolTable(symtab* st);
@@ -45,9 +60,5 @@ stEntry* st_lookup(symtab* st, const char* identifier);
 void print_symtab(FILE* out, const symtab* st);
 void print_stEntry(FILE* out, const stEntry* e);
 
-// void hide(symtab* table, char** scope);
-//
-// void set(symtab* table); // Beginning of block
-// void reset(symtab* table); // End of block
 
 #endif

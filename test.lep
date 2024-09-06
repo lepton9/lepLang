@@ -1,11 +1,6 @@
 
-f:sum(int:first, int:second) -> int {
-  int:total = first + second;
-  ret total;
-}
-
-f:main() -> int {
-  int:a = 123;
-  float:b = 12.0;
-  ret 0;
-}
+int:a = 2;
+char:b = 'a';
+str:c = "abc";
+bool:d = true;
+float:e = 1.0;

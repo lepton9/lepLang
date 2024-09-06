@@ -5,16 +5,6 @@
 #include "../include/symtab.h"
 #include "../include/stack.h"
 
-typedef enum {
-  INT = 200,
-  FLOAT,
-  CHAR,
-  STR,
-  BOOL,
-  F,
-  VOID
-} TYPE;
-
 typedef struct {
   char* func_name;
   TYPE ret_type;
@@ -22,15 +12,6 @@ typedef struct {
   int ret_scope;
 } context;
 
-typedef struct {
-  LList* s;
-  LList* contexts;
-  int cur_scope;
-  int memOffset;
-} symtabStack;
-
-symtabStack* init_st_stack();
-void free_st_stack(symtabStack* sts);
 
 symtab* currentScope(symtabStack* sts);
 void enter_scope(symtabStack* sts);

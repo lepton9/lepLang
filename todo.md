@@ -1,7 +1,11 @@
 DONE:
-- better error printing
 
 TODO:
+- function to set values for global and local variables, based on their memory location
+- register allocation and management
+- scope based memory offset
+
+
 - memory address of the value
 - type casting
 - tests for hashtab

@@ -1,8 +1,14 @@
 #include "../include/analyzer.h"
 #include "../include/errorlep.h"
+#include "../include/codegen.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+
+// TODO: Add offset here instead of sts->memOffset
+int offsets[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Memory offsets in every scope
+
+asmf* af = NULL;
 
 symtabStack* init_st_stack() {
   symtabStack* sts = malloc(sizeof(symtabStack));
@@ -83,6 +89,7 @@ bool allocMem(symtabStack* sts, stEntry* e, const int size) {
   e->size = size;
   e->address = sts->memOffset;
   sts->memOffset += size;
+  // sts->memOffset += 4; // Every variable would be 4 bytes
   return true;
 }
 
@@ -91,12 +98,18 @@ stEntry* newVariable(symtabStack* sts, const char* id, const TYPE type) {
   var->type = type;
   var->value = NULL;
   var->scope = sts->cur_scope;
-  allocMem(sts, var, sizeOfType(var->type));
+  if (sts->cur_scope == 0 || type == F) {
+    var->size = sizeOfType(type);
+    var->address = -1;
+  } else {
+    allocMem(sts, var, sizeOfType(var->type));
+  }
   return var;
 }
 
 void semanticAnalysis(symtabStack* sts, AST* ast) {
   if (ast == NULL) return;
+  if (af == NULL) af = initAsmfile("out.txt"); // TODO: temporary
 
   switch(ast->type) {
     case AST_FUNCTION: {
@@ -190,6 +203,9 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
       }
       stEntry* var = newVariable(sts, id->tok->value, convertType(ast->l->tok->type));
       var->declLine = id->tok->loc.line;
+
+      if (sts->cur_scope == 0) compile_global_var(af, var, NULL);
+
       if (sts->contexts->head) {
         context* c = sts->contexts->head->data;
         stEntry* f = lookup_all(sts, c->func_name);
@@ -360,7 +376,6 @@ void checkAST(AST* root) {
   printf("\nGlobal scope:\n");
   print_symtab(stdout, st_stack->s->head->data);
 
-  // printf("Global variables %d\n", (int)currentScope(st_stack)->n);
   free_st_stack(st_stack);
 
 }
