@@ -19,10 +19,15 @@ typedef enum {
 } TYPE;
 
 typedef struct {
+  char* name;
+  TYPE type;
+  int regI;
+} parameter;
+
+typedef struct {
   int ret_type;
   size_t n_params;
-  int* param_types;
-  char** param_names;
+  parameter* params;
 } func_info;
 
 typedef struct {

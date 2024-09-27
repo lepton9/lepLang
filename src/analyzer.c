@@ -129,11 +129,11 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
       f->f_info = malloc(sizeof(func_info));
       f->f_info->ret_type = convertType(ast->l->l->next->next->tok->type);
       f->f_info->n_params = 0;
+      int regI = 1;
       while (param) {
-        f->f_info->param_types = realloc(f->f_info->param_types, sizeof(int) * f->f_info->n_params + 1);
-        f->f_info->param_names = realloc(f->f_info->param_names, sizeof(char*) * f->f_info->n_params + 1);
-        f->f_info->param_types[f->f_info->n_params] = convertType(param->l->tok->type);
-        f->f_info->param_names[f->f_info->n_params] = param->r->tok->value;
+        assert(regI <= 6); // TODO: remaining params to stack
+        f->f_info->params = realloc(f->f_info->params, sizeof(parameter) * (f->f_info->n_params + 1));
+        f->f_info->params[f->f_info->n_params] = (parameter){param->r->tok->value, convertType(param->l->tok->type), regI++};
         assert(param->type == AST_VARIABLE);
         f->f_info->n_params++;
         param = param->next;
@@ -147,7 +147,9 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
         c->ret_scope = -1;
         add_to_begin(sts->contexts, c);
 
-        semanticAnalysis(sts, header);
+        compile_func_def(af, sts, f);
+
+        semanticAnalysis(sts, header); // TODO: handle here instead
         semanticAnalysis(sts, body);
 
         if (f->f_info->ret_type != VOID) {
@@ -178,13 +180,13 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
         if (c->ret_scope < 0 || c->ret_scope > sts->cur_scope) {
           c->ret_scope = sts->cur_scope;
         }
-        
       } else {
         error_semantic("Return statement outside of a function\n", ast->tok->loc);
       }
       if (!matchType(ret_type, func_ret_type)) {
         error_type("Wrong function return type", ast->tok->loc, ret_type, func_ret_type);
       }
+      compile_ret(af, sts, ast->l, sizeOfType(ret_type));
       break;
     }
     case AST_FCALL: {
@@ -215,7 +217,7 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
         context* c = sts->contexts->head->data;
         stEntry* f = lookup_all(sts, c->func_name);
         for (int i = 0; i < f->f_info->n_params; i++) {
-          if (strcmp(f->f_info->param_names[i], var->name) == 0) {
+          if (strcmp(f->f_info->params[i].name, var->name) == 0) {
             var->value = ast;
             break;
           }
@@ -331,8 +333,8 @@ bool typecheck_fcall(symtabStack* sts, AST* fcall) {
   int i = 0;
   while(arg && i < f->f_info->n_params) {
     TYPE type = expr_type(sts, arg);
-    if (!matchType(type, f->f_info->param_types[i])) {
-      error_type("Wrong function argument type", arg->tok->loc, type, f->f_info->param_types[i]);
+    if (!matchType(type, f->f_info->params[i].type)) {
+      error_type("Wrong function argument type", arg->tok->loc, type, f->f_info->params[i].type);
     }
     i++;
     arg = arg->next;

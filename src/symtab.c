@@ -22,7 +22,7 @@ void free_stEntry(stEntry* entry) {
   free(entry->name);
   free(entry->usageLines);
   if (entry->f_info) {
-    free(entry->f_info->param_types);
+    free(entry->f_info->params);
     free(entry->f_info);
   }
   free(entry);
@@ -56,7 +56,7 @@ void print_stEntry(FILE* out, const stEntry* e) {
   if (e->f_info) {
     fprintf(out, " | ret: %d args: ( ", e->f_info->ret_type);
     for (int i = 0; i < e->f_info->n_params; i++) {
-      fprintf(out, "%d ", e->f_info->param_types[i]);
+      fprintf(out, "%d ", e->f_info->params[i].type);
     }
     fprintf(out, ")");
   }
