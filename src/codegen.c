@@ -49,6 +49,27 @@ void exit_stackframe(asmf* af) {
   fprintf(af->file, "popq %%rpb\n");
 }
 
+
+char* inst(const char* instruction, size_t size) {
+  char* instructionSized = malloc(strlen(instruction) + 1);
+  strcpy(instructionSized, instruction);
+  if (size == 8) strcat(instructionSized, "q");
+  else if (size == 4) strcat(instructionSized, "l");
+  else if (size == 2) strcat(instructionSized, "w");
+  else if (size == 1) strcat(instructionSized, "b");
+  return instructionSized;
+}
+
+void set_var_value(asmf* af, stEntry* e, void* value) {
+  char* instruction = inst("mov", e->size);
+  fprintf(af->file, "%s $%d, -%d(%%rbp)\n", instruction, (value) ? *(int*)value : 0, e->address);
+  free(instruction);
+}
+
+void compile_var(asmf* af, stEntry* e) {
+  set_var_value(af, e, NULL);
+}
+
 void compile_global_var(asmf* af, stEntry* e, void* value) {
     fprintf(af->file, "  .globl %s\n", e->name);
     fprintf(af->file, "  .data\n");

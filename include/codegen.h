@@ -23,11 +23,14 @@ asmf* initAsmfile(const char* fname);
 void freeAsmfile(asmf* af);
 void append_line(asmf* af, const char* line);
 
+char* inst(const char* instruction, size_t size);
+
 void init_stackframe(asmf* af, const size_t size);
 void exit_stackframe(asmf* af);
 
+void set_var_value(asmf* af, stEntry* e, void* value);
 void compile_expr(); // Val to rax
-void compile_var(asmf* af, stEntry* e); // Push to stack
+void compile_var(asmf* af, stEntry* e);
 void compile_add();
 void compile_neg();
 void compile_fcall(); // Stack frame
