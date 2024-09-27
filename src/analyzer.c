@@ -5,15 +5,13 @@
 #include <stdio.h>
 #include <string.h>
 
-// TODO: Add offset here instead of sts->memOffset
-int offsets[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // Memory offsets in every scope
 
 asmf* af = NULL;
 
 symtabStack* init_st_stack() {
   symtabStack* sts = malloc(sizeof(symtabStack));
   sts->cur_scope = 0;
-  sts->memOffset = 0;
+  sts->memOffsets = create_list();
   sts->s = create_list();
   sts->contexts = create_list();
   symtab* global_st = initSymbolTable();
@@ -28,19 +26,25 @@ void free_st_stack(symtabStack* sts) {
   }
   free(sts->s);
   free(sts->contexts);
+  free(sts->memOffsets);
   free(sts);
 }
 
 void enter_scope(symtabStack* sts) {
   symtab* st = initSymbolTable();
   add_to_begin(sts->s, st);
+  int* z = malloc(sizeof(int));
+  *z = 0;
+  add_to_begin(sts->memOffsets, z);
   sts->cur_scope++;
+  assert(sts->cur_scope == sts->memOffsets->size);
 }
 
 void exit_scope(symtabStack* sts) {
   // if (sts->cur_scope == 0) return;
   assert(sts->cur_scope > 0);
   symtab* st = pop_front(sts->s);
+  pop_front(sts->memOffsets);
   freeSymbolTable(st);
   sts->cur_scope--;
 }
@@ -85,10 +89,10 @@ int sizeOfType(const TYPE type) {
 }
 
 bool allocMem(symtabStack* sts, stEntry* e, const int size) {
-  if (sts->memOffset + size > MAX_MEM) return false;
+  if (*(int*)sts->memOffsets->head->data + size > MAX_MEM) return false;
   e->size = size;
-  e->address = sts->memOffset;
-  sts->memOffset += size;
+  e->address = *(int*)sts->memOffsets->head->data;
+  *(int*)sts->memOffsets->head->data += size;
   // sts->memOffset += 4; // Every variable would be 4 bytes
   return true;
 }
@@ -205,6 +209,7 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
       var->declLine = id->tok->loc.line;
 
       if (sts->cur_scope == 0) compile_global_var(af, var, NULL);
+      else compile_var(af, var);
 
       if (sts->contexts->head) {
         context* c = sts->contexts->head->data;

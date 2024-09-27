@@ -43,8 +43,8 @@ typedef hashtab symtab;
 typedef struct {
   LList* s;
   LList* contexts;
+  LList* memOffsets;
   int cur_scope;
-  int memOffset;
 } symtabStack;
 
 symtabStack* init_st_stack();
