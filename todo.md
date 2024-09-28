@@ -3,7 +3,8 @@ DONE:
 TODO:
 - function to set values for global and local variables, based on their memory location
 - register allocation and management
-- scope based memory offset
+- ability to access variables on the stack from a higher scope
+    - compare the current scope and the variables scope
 
 
 - memory address of the value
@@ -39,7 +40,6 @@ TODO:
     - compile to machine language
 
 - # This is a comment until \n
-- functions are linear transformations
 - lines end in semicolons
 - function syntax
     - function {type -> type: logic}

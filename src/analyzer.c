@@ -133,9 +133,10 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
       while (param) {
         assert(regI <= 6); // TODO: remaining params to stack
         f->f_info->params = realloc(f->f_info->params, sizeof(parameter) * (f->f_info->n_params + 1));
-        f->f_info->params[f->f_info->n_params] = (parameter){param->r->tok->value, convertType(param->l->tok->type), regI++};
+        f->f_info->params[f->f_info->n_params] = (parameter){param->r->tok->value, convertType(param->l->tok->type), regI};
         assert(param->type == AST_VARIABLE);
         f->f_info->n_params++;
+        regI++;
         param = param->next;
       }
       enter_scope(sts);
@@ -149,7 +150,7 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
 
         compile_func_def(af, sts, f);
 
-        semanticAnalysis(sts, header); // TODO: handle here instead
+        semanticAnalysis(sts, header);
         semanticAnalysis(sts, body);
 
         if (f->f_info->ret_type != VOID) {
@@ -195,8 +196,10 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
     }
     case AST_BLOCK: {
       enter_scope(sts);
+      init_stackframe(af, 2048);
       semanticAnalysis(sts, ast->l);
       print_symtab(stdout, currentScope(sts));
+      exit_stackframe(af);
       exit_scope(sts);
       semanticAnalysis(sts, ast->next);
       return;
@@ -210,19 +213,24 @@ void semanticAnalysis(symtabStack* sts, AST* ast) {
       stEntry* var = newVariable(sts, id->tok->value, convertType(ast->l->tok->type));
       var->declLine = id->tok->loc.line;
 
-      if (sts->cur_scope == 0) compile_global_var(af, var, NULL);
-      else compile_var(af, var);
-
-      if (sts->contexts->head) {
+      char compiled = 0;
+      if (sts->cur_scope == 0) {
+        compile_global_var(af, var, NULL);
+        compiled = 1;
+      }
+      else if (sts->contexts->head) {
         context* c = sts->contexts->head->data;
         stEntry* f = lookup_all(sts, c->func_name);
         for (int i = 0; i < f->f_info->n_params; i++) {
           if (strcmp(f->f_info->params[i].name, var->name) == 0) {
             var->value = ast;
+            compile_param(af, var, f->f_info->params[i].regI);
+            compiled = 1;
             break;
           }
         }
       }
+      if (!compiled) compile_var(af, var);
       break;
     }
     case AST_ASSIGNMENT: {

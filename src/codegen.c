@@ -46,11 +46,10 @@ void init_stackframe(asmf* af, const size_t size) {
 
 void exit_stackframe(asmf* af) {
   fprintf(af->file, "movq %%rbp, %%rsp\n");
-  fprintf(af->file, "popq %%rpb\n");
+  fprintf(af->file, "popq %%rbp\n");
 }
 
-
-char* inst(const char* instruction, size_t size) {
+char* inst(const char* instruction, const size_t size) {
   char* instructionSized = malloc(strlen(instruction) + 1);
   strcpy(instructionSized, instruction);
   if (size == 8) strcat(instructionSized, "q");
@@ -68,6 +67,13 @@ void set_var_value(asmf* af, stEntry* e, void* value) {
 
 void compile_var(asmf* af, stEntry* e) {
   set_var_value(af, e, NULL);
+}
+
+void compile_param(asmf* af, stEntry* e, const int regI) {
+  char* instruction = inst("mov", e->size);
+  fprintf(af->file, "%s %%%s, -%d(%%rbp)\n", instruction, selReg(regI, e->size), e->address);
+  freeReg(regI);
+  free(instruction);
 }
 
 void compile_global_var(asmf* af, stEntry* e, void* value) {
@@ -89,14 +95,28 @@ void compile_global_var(asmf* af, stEntry* e, void* value) {
   fprintf(af->file, "\n");
 }
 
-void compile_func_def(asmf* af, symtabStack* sts, AST* ast) {
-  size_t stackframe_size = 2048; // Calculate needed size
-  fprintf(af->file, "%s:\n", "funcname");
-  init_stackframe(af, stackframe_size);
+// Maybe give return register as param
+void compile_expr(asmf* af, symtabStack* sts, AST* expr, int typeSize) {
+    fprintf(af->file, "movq $%d, %%rax\n", 0); // Ret value
+}
 
-  fprintf(af->file, "movq $%d, %%rax\n", 0); // Ret value
+void compile_ret(asmf* af, symtabStack* sts, AST* expr, int typeSize) {
+
+  if (expr) {
+    compile_expr(af, sts, expr, typeSize);
+  }
   exit_stackframe(af);
   fprintf(af->file, "ret\n");
+}
+
+void compile_func_def(asmf* af, symtabStack* sts, stEntry* f) {
+  size_t stackframe_size = 2048; // Calculate needed size
+  fprintf(af->file, "\n%s:\n", f->name);
+  init_stackframe(af, stackframe_size);
+
+  // fprintf(af->file, "movq $%d, %%rax\n", 0); // Ret value
+  // exit_stackframe(af);
+  // fprintf(af->file, "ret\n");
 }
 
 
