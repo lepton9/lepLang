@@ -41,6 +41,8 @@ typedef struct {
   int slot; // Stack slot
   func_info* f_info;
   AST* value;
+  int version;
+  int version_counter;
 } stEntry;
 
 typedef hashtab symtab;
@@ -61,6 +63,9 @@ void free_stEntry(stEntry* entry);
 
 stEntry* st_insert(symtab* st, const char* key);
 stEntry* st_lookup(symtab* st, const char* identifier);
+
+void enter_scope(symtabStack *sts);
+void exit_scope(symtabStack *sts);
 
 void print_symtab(FILE* out, const symtab* st);
 void print_stEntry(FILE* out, const stEntry* e);

@@ -30,25 +30,6 @@ void free_st_stack(symtabStack* sts) {
   free(sts);
 }
 
-void enter_scope(symtabStack* sts) {
-  symtab* st = initSymbolTable();
-  add_to_begin(sts->s, st);
-  int* z = malloc(sizeof(int));
-  *z = 0;
-  add_to_begin(sts->memOffsets, z);
-  sts->cur_scope++;
-  assert(sts->cur_scope == sts->memOffsets->size);
-}
-
-void exit_scope(symtabStack* sts) {
-  // if (sts->cur_scope == 0) return;
-  assert(sts->cur_scope > 0);
-  symtab* st = pop_front(sts->s);
-  pop_front(sts->memOffsets);
-  freeSymbolTable(st);
-  sts->cur_scope--;
-}
-
 stEntry* lookup_all(symtabStack* sts, const char* key) {
   node* scope = sts->s->head;
   stEntry* e;
