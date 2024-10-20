@@ -2,7 +2,7 @@ DONE:
 
 TODO:
 - AST to IR SSA
-- Compiler SSA to assembly
+- Compile SSA to assembly
 
 - function to set values for global and local variables, based on their memory location
 - register allocation and management

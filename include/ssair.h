@@ -81,12 +81,12 @@ char* var_name(const char* name, const int version); // x, 1 -> x_1
 
 ssa* init_ssa();
 function* create_function(const char* name, const int param_n);
-instruction* create_instruction(opcode op, int dest, int src1, int src2);
+instruction* create_instruction(opcode op, char* dest, char* src1, char* src2);
 basic_block* create_block(int id);
 
-ssa_node* addSSAfunc(ssa* ssa, symtabStack* sts, AST* ast);
-ssa_node* addSSAvar(ssa* ssa, symtabStack* sts, AST* ast);
-ssa_node* addSSAassign(ssa* ssa, symtabStack* sts, AST* ast);
+ssa_node* addSSA_func(ssa* ssa, symtabStack* sts, AST* ast);
+ssa_node* addSSA_var_g(ssa* ssa, symtabStack* sts, AST* ast);
+ssa_node* addSSA_assign_g(ssa* ssa, symtabStack* sts, AST* ast);
 
 #endif
 
