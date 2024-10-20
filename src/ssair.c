@@ -14,9 +14,33 @@ function* create_function(const char* name, const int param_n) {
   for (int i = 0; i < param_n; i++) f->params[i] = malloc(sizeof(var));
   return f;
 }
+
+// TODO: or from stEntry
+char* var_name(const char* name, const int version) {
+  if (version == 0) return (char*)name;
+  char* ssa_id = malloc(strlen(name) + 10);
+  sprintf(ssa_id, "%s_%d", name, version);
+  return ssa_id;
+}
+
+void inc_var_version(symtab* st, const char* name) {
+  stEntry* e = st_lookup(st, name);
+  if (e) {
+    e->version_counter++;
+    stEntry* new_e = st_insert(st, var_name(name, e->version_counter));
+    new_e->version = e->version_counter;
+    new_e->version_counter = 1;
+  } else {
+    stEntry* new_e = st_insert(st, name);
+    new_e->version = 0;
+    new_e->version_counter = 0;
+  }
+}
+
 instruction* create_instruction(opcode op, int dest, int src1, int src2) {
 
 }
+
 basic_block* create_block(int id) {
 
 }
